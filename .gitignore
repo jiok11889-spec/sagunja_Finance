@@ -6,3 +6,7 @@ Temp/
 *.bat
 *.vbs
 sample/
+data/*_backup_*.xlsx
+data/KakaoTalk_*.png
+memory/
+.claude/

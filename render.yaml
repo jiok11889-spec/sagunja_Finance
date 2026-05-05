@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: sajunja-finance
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python src/dashboard.py
+    envVars:
+      - key: PORT
+        generateValue: false
