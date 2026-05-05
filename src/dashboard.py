@@ -29,11 +29,12 @@ def load_member_status():
     active = []
     for name, status in zip(headers, statuses):
         if name in (None, 'No', '탈퇴멤버', '계'): continue
-        if status == '탈퇴': continue
+        if status == '탈퇴': continue   # 탈퇴만 제외, 미표기는 유지로 간주
         active.append(name)
     return active
 
 def load_income_by_month():
+    # 회비 입금은 탈퇴멤버 포함 전체 합산 (실제 계좌 입금액 기준)
     df = pd.read_excel(EXCEL_PATH, sheet_name='입금현황')
     members = [c for c in df.columns if c not in ['No','계'] and not str(c).startswith('Unnamed')]
     data = df[df['No'].apply(lambda x: isinstance(x,str) and '년' in str(x))].copy()
@@ -75,6 +76,7 @@ def load_wonjang_rows():
     return rows
 
 def load_member_totals():
+    # 탈퇴 포함 전체 (잔액 계산용)
     df = pd.read_excel(EXCEL_PATH, sheet_name='입금현황')
     members = [c for c in df.columns if c not in ['No','탈퇴멤버','계'] and not str(c).startswith('Unnamed')]
     data = df[df['No'].apply(lambda x: isinstance(x,str) and '년' in str(x))].copy()
@@ -91,7 +93,7 @@ def build_data():
     expense_by_cat={}; expense_by_month={}
     for r in rows:
         if r['분류1']=='출금' and r['차변']>0:
-            net = r['차변'] - max(r['대변'], 0)
+            net = r['차변'] - max(r['대변'], 0)  # 대변(환불)이 있으면 차감
             expense_by_cat[r['분류2']]=expense_by_cat.get(r['분류2'],0)+net
             expense_by_month[r['연월']]=expense_by_month.get(r['연월'],0)+net
     total_in=sum(income_by_month.values())+sum(extra_income.values())
@@ -156,7 +158,7 @@ HTML = '''<!DOCTYPE html>
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{background:var(--bg);}
-body{background:var(--bg);color:var(--w);font-family:\'DM Sans\',sans-serif;font-weight:400;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--w);font-family:'DM Sans',sans-serif;font-weight:400;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
 /* NAV */
 nav{
@@ -168,7 +170,7 @@ nav{
   height:52px;
   display:flex;align-items:center;justify-content:space-between;
 }
-.nav-logo{font-family:\'DM Serif Display\',serif;font-size:17px;color:var(--w);letter-spacing:0.3px;}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:17px;color:var(--w);letter-spacing:0.3px;}
 .nav-logo em{color:var(--p);font-style:normal;}
 .nav-right{display:flex;align-items:center;gap:14px;}
 .nav-time{font-size:11px;color:var(--w3);letter-spacing:0.5px;}
@@ -181,7 +183,7 @@ nav{
 .hero{margin-bottom:20px;}
 .hero-eyebrow{font-size:10px;letter-spacing:2.5px;color:var(--w3);text-transform:uppercase;margin-bottom:14px;}
 .hero-main{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
-.hero-num{font-family:\'DM Serif Display\',serif;font-size:58px;line-height:1;letter-spacing:-2px;color:var(--w);}
+.hero-num{font-family:'DM Serif Display',serif;font-size:58px;line-height:1;letter-spacing:-2px;color:var(--w);}
 .hero-num sup{font-size:22px;letter-spacing:0;vertical-align:super;color:var(--w2);}
 .hero-meta{text-align:right;}
 .hero-meta-period{font-size:11px;color:var(--w3);margin-bottom:6px;}
@@ -336,9 +338,9 @@ nav{
     <div class="sec-head">
       <span class="sec-title">Monthly Flow</span>
       <div class="tabs">
-        <button class="tab on" onclick="setMode(\'bar\',this)">막대</button>
-        <button class="tab" onclick="setMode(\'line\',this)">추세</button>
-        <button class="tab" onclick="setMode(\'cum\',this)">누적</button>
+        <button class="tab on" onclick="setMode('bar',this)">막대</button>
+        <button class="tab" onclick="setMode('line',this)">추세</button>
+        <button class="tab" onclick="setMode('cum',this)">누적</button>
       </div>
     </div>
     <div class="leg-row">
@@ -366,7 +368,7 @@ nav{
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <span class="pay-count" id="pay-count">—</span>
-        <div onclick="navigator.clipboard.writeText(\'79790864002\')" title="클릭하면 계좌번호 복사" style="cursor:pointer;background:rgba(0,212,160,0.08);border:1px solid rgba(0,212,160,0.2);border-radius:8px;padding:5px 11px;text-align:right;">
+        <div onclick="navigator.clipboard.writeText('79790864002')" title="클릭하면 계좌번호 복사" style="cursor:pointer;background:rgba(0,212,160,0.08);border:1px solid rgba(0,212,160,0.2);border-radius:8px;padding:5px 11px;text-align:right;">
           <div style="font-size:9px;color:rgba(0,212,160,0.6);letter-spacing:0.8px;margin-bottom:2px;">카카오뱅크 · 조현민</div>
           <div style="font-size:12px;font-weight:500;color:#00D4A0;letter-spacing:1px;">7979-0864-002</div>
         </div>
@@ -382,27 +384,27 @@ nav{
 </div>
 
 <script>
-const fmtFull = n => Math.round(Math.abs(n)).toLocaleString(\'ko-KR\');
-const fmtK    = n => { const a=Math.abs(Math.round(n)); return a>=1000000?(a/1000000).toFixed(1)+\'M\':a>=10000?(a/10000).toFixed(0)+\'만\':a.toLocaleString(); };
+const fmtFull = n => Math.round(Math.abs(n)).toLocaleString('ko-KR');
+const fmtK    = n => { const a=Math.abs(Math.round(n)); return a>=1000000?(a/1000000).toFixed(1)+'M':a>=10000?(a/10000).toFixed(0)+'만':a.toLocaleString(); };
 
-let D=null, MC=null, FC=null, mode=\'bar\';
+let D=null, MC=null, FC=null, mode='bar';
 
 async function init(){
-  document.getElementById(\'nav-time\').textContent=\'…\';
-  const r=await fetch(\'/api/data\'); D=await r.json(); render();
+  document.getElementById('nav-time').textContent='…';
+  const r=await fetch('/api/data'); D=await r.json(); render();
 }
 
 function render(){
   const s=D.summary;
-  document.getElementById(\'nav-time\').textContent=s.updated;
-  document.getElementById(\'h-bal\').textContent=fmtFull(s.balance);
+  document.getElementById('nav-time').textContent=s.updated;
+  document.getElementById('h-bal').textContent=fmtFull(s.balance);
   const real=D.monthly.filter(m=>m.income>0||m.expense>0);
-  document.getElementById(\'h-period\').textContent=real.length?`${real[0].month} — ${real[real.length-1].month}`:\'\';
+  document.getElementById('h-period').textContent=real.length?`${real[0].month} — ${real[real.length-1].month}`:'';
   const net=s.total_in-s.total_out;
-  document.getElementById(\'h-net\').textContent=(net>=0?\'▲ +\':\'▼ \')+fmtK(net)+\'원 순증\';
-  document.getElementById(\'h-in\').textContent=fmtK(s.total_in)+\'원\';
-  document.getElementById(\'h-out\').textContent=fmtK(s.total_out)+\'원\';
-  document.getElementById(\'h-avg\').textContent=fmtK(s.avg6)+\'원\';
+  document.getElementById('h-net').textContent=(net>=0?'▲ +':'▼ ')+fmtK(net)+'원 순증';
+  document.getElementById('h-in').textContent=fmtK(s.total_in)+'원';
+  document.getElementById('h-out').textContent=fmtK(s.total_out)+'원';
+  document.getElementById('h-avg').textContent=fmtK(s.avg6)+'원';
   buildMain(); buildFc(); buildPaySelect(); buildMembers(); buildTL();
 }
 
@@ -411,21 +413,21 @@ function buildMain(){
   const real=D.monthly.filter(m=>m.income>0||m.expense>0);
   const labels=real.map(m=>m.month);
   let ds;
-  if(mode===\'cum\'){
-    ds=[{type:\'line\',data:real.map(m=>m.cumulative),borderColor:\'rgba(255,255,255,0.5)\',backgroundColor:\'rgba(255,255,255,0.03)\',fill:true,tension:0.4,pointRadius:0,borderWidth:1.5,borderDash:[4,3]}];
+  if(mode==='cum'){
+    ds=[{type:'line',data:real.map(m=>m.cumulative),borderColor:'rgba(255,255,255,0.5)',backgroundColor:'rgba(255,255,255,0.03)',fill:true,tension:0.4,pointRadius:0,borderWidth:1.5,borderDash:[4,3]}];
   } else {
     ds=[
-      {type:mode,label:\'입금\',data:real.map(m=>m.income),backgroundColor:mode===\'bar\'?\'rgba(0,212,160,0.65)\':\'\transparent\',borderColor:\'#00D4A0\',borderRadius:mode===\'bar\'?3:0,borderWidth:1.5,tension:0.4,pointRadius:0,fill:false},
-      {type:mode,label:\'출금\',data:real.map(m=>m.expense),backgroundColor:mode===\'bar\'?\'rgba(255,94,94,0.55)\':\'\transparent\',borderColor:\'#ff5e5e\',borderRadius:mode===\'bar\'?3:0,borderWidth:1.5,tension:0.4,pointRadius:0,fill:false},
+      {type:mode,label:'입금',data:real.map(m=>m.income),backgroundColor:mode==='bar'?'rgba(0,212,160,0.65)':'transparent',borderColor:'#00D4A0',borderRadius:mode==='bar'?3:0,borderWidth:1.5,tension:0.4,pointRadius:0,fill:false},
+      {type:mode,label:'출금',data:real.map(m=>m.expense),backgroundColor:mode==='bar'?'rgba(255,94,94,0.55)':'transparent',borderColor:'#ff5e5e',borderRadius:mode==='bar'?3:0,borderWidth:1.5,tension:0.4,pointRadius:0,fill:false},
     ];
   }
-  MC=new Chart(document.getElementById(\'mainC\'),{
+  MC=new Chart(document.getElementById('mainC'),{
     data:{labels,datasets:ds},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtK(c.raw)+\'원\'}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtK(c.raw)+'원'}}},
       scales:{
-        x:{ticks:{color:\'rgba(255,255,255,0.25)\',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},
-        y:{ticks:{color:\'rgba(255,255,255,0.25)\',font:{size:10},callback:v=>fmtK(v)},grid:{color:\'rgba(255,255,255,0.04)\'},border:{display:false}}
+        x:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},
+        y:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}
       }}
   });
 }
@@ -450,14 +452,16 @@ function buildFc(){
   const excluded=loVals.length-loFiltered.length;
   const cb=D.summary.balance;
 
+  // 5개 시나리오 — 에메랄드(절약) ↔ 레드(지출과다) 그라데이션
   const scenarios=[
-    {label:\'지출 -20%\', in:ai, out:Math.round(ao*0.8), color:\'rgba(0,212,160,1.0)\',  dim:\'rgba(0,212,160,0.07)\',  dash:[]},
-    {label:\'지출 -10%\', in:ai, out:Math.round(ao*0.9), color:\'rgba(0,212,160,0.45)\', dim:\'rgba(0,212,160,0.03)\',  dash:[4,3]},
-    {label:\'현재 추세\',  in:ai, out:ao,                 color:\'rgba(255,255,255,0.55)\',dim:\'rgba(255,255,255,0.02)\',dash:[5,4]},
-    {label:\'지출 +10%\', in:ai, out:Math.round(ao*1.1), color:\'rgba(255,94,94,0.45)\', dim:\'rgba(255,94,94,0.03)\',  dash:[4,3]},
-    {label:\'지출 +20%\', in:ai, out:Math.round(ao*1.2), color:\'rgba(255,94,94,1.0)\',  dim:\'rgba(255,94,94,0.07)\',  dash:[]},
+    {label:'지출 -20%', in:ai, out:Math.round(ao*0.8), color:'rgba(0,212,160,1.0)',  dim:'rgba(0,212,160,0.07)',  dash:[]},
+    {label:'지출 -10%', in:ai, out:Math.round(ao*0.9), color:'rgba(0,212,160,0.45)', dim:'rgba(0,212,160,0.03)',  dash:[4,3]},
+    {label:'현재 추세',  in:ai, out:ao,                 color:'rgba(255,255,255,0.55)',dim:'rgba(255,255,255,0.02)',dash:[5,4]},
+    {label:'지출 +10%', in:ai, out:Math.round(ao*1.1), color:'rgba(255,94,94,0.45)', dim:'rgba(255,94,94,0.03)',  dash:[4,3]},
+    {label:'지출 +20%', in:ai, out:Math.round(ao*1.2), color:'rgba(255,94,94,1.0)',  dim:'rgba(255,94,94,0.07)',  dash:[]},
   ];
 
+  // 각 시나리오별 12개월 포인트 계산
   const hist=real.slice(-5);
   const fcLabels=[];
   for(let i=1;i<=12;i++){
@@ -468,8 +472,9 @@ function buildFc(){
   const histConnect=hist[hist.length-1].cumulative;
 
   const datasets=[
-    {label:\'실제\',data:[...hist.map(m=>m.cumulative),...new Array(12).fill(null)],
-     borderColor:\'rgba(255,255,255,0.4)\',backgroundColor:\'rgba(255,255,255,0.02)\',
+    // 실제 이력
+    {label:'실제',data:[...hist.map(m=>m.cumulative),...new Array(12).fill(null)],
+     borderColor:'rgba(255,255,255,0.4)',backgroundColor:'rgba(255,255,255,0.02)',
      fill:true,tension:0.4,pointRadius:0,borderWidth:2}
   ];
 
@@ -486,14 +491,14 @@ function buildFc(){
   });
 
   if(FC)FC.destroy();
-  FC=new Chart(document.getElementById(\'fcC\'),{
-    type:\'line\',
+  FC=new Chart(document.getElementById('fcC'),{
+    type:'line',
     data:{labels:allL,datasets},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{
         legend:{display:false},
         tooltip:{
-          mode:\'index\',intersect:false,
+          mode:'index',intersect:false,
           callbacks:{
             label:c=>c.raw!=null?` ${c.dataset.label}: ${fmtK(c.raw)}원`:null,
             filter:c=>c.raw!=null
@@ -501,24 +506,27 @@ function buildFc(){
         }
       },
       scales:{
-        x:{ticks:{color:\'rgba(255,255,255,0.25)\',font:{size:10},maxRotation:45},grid:{display:false},border:{display:false}},
-        y:{ticks:{color:\'rgba(255,255,255,0.25)\',font:{size:10},callback:v=>fmtK(v)},grid:{color:\'rgba(255,255,255,0.04)\'},border:{display:false}}
+        x:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},maxRotation:45},grid:{display:false},border:{display:false}},
+        y:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}
       }}
   });
 
-  const desc=document.getElementById(\'fc-desc\');
+  // 설명 텍스트
+  const desc=document.getElementById('fc-desc');
   if(desc) desc.innerHTML=
     `입금 기준: 최근 6개월 평균 <b style="color:rgba(255,255,255,0.7)">${fmtK(ai)}원</b> &nbsp;·&nbsp; `+
     `지출 기준: 최근 12개월 IQR 평균 <b style="color:rgba(255,255,255,0.7)">${fmtK(ao)}원</b> (비경상 ${excluded}개월 제외)`;
 
-  const fcc=document.getElementById(\'fc-cards\');
-  fcc.innerHTML=\'\';
+  // 카드: 5개 시나리오 × 12개월 후 잔액
+  const fcc=document.getElementById('fc-cards');
+  fcc.innerHTML='';
+  // 카드: 에메랄드↔레드 그라데이션 배경
   const cardStyles=[
-    {bg:\'rgba(0,212,160,0.18)\', border:\'rgba(0,212,160,0.35)\', mo:\'rgba(0,212,160,0.55)\', val:\'#00D4A0\', chg:\'rgba(0,212,160,0.7)\'},
-    {bg:\'rgba(0,212,160,0.07)\', border:\'rgba(0,212,160,0.18)\', mo:\'rgba(0,212,160,0.4)\',  val:\'rgba(0,212,160,0.8)\', chg:\'rgba(0,212,160,0.5)\'},
-    {bg:\'rgba(255,255,255,0.04)\',border:\'rgba(255,255,255,0.12)\',mo:\'rgba(255,255,255,0.3)\',val:\'rgba(255,255,255,0.75)\',chg:\'rgba(255,255,255,0.4)\'},
-    {bg:\'rgba(255,94,94,0.07)\',  border:\'rgba(255,94,94,0.18)\', mo:\'rgba(255,94,94,0.4)\',  val:\'rgba(255,94,94,0.8)\', chg:\'rgba(255,94,94,0.5)\'},
-    {bg:\'rgba(255,94,94,0.18)\',  border:\'rgba(255,94,94,0.35)\', mo:\'rgba(255,94,94,0.55)\', val:\'#ff5e5e\', chg:\'rgba(255,94,94,0.7)\'},
+    {bg:'rgba(0,212,160,0.18)', border:'rgba(0,212,160,0.35)', mo:'rgba(0,212,160,0.55)', val:'#00D4A0', chg:'rgba(0,212,160,0.7)'},
+    {bg:'rgba(0,212,160,0.07)', border:'rgba(0,212,160,0.18)', mo:'rgba(0,212,160,0.4)',  val:'rgba(0,212,160,0.8)', chg:'rgba(0,212,160,0.5)'},
+    {bg:'rgba(255,255,255,0.04)',border:'rgba(255,255,255,0.12)',mo:'rgba(255,255,255,0.3)',val:'rgba(255,255,255,0.75)',chg:'rgba(255,255,255,0.4)'},
+    {bg:'rgba(255,94,94,0.07)',  border:'rgba(255,94,94,0.18)', mo:'rgba(255,94,94,0.4)',  val:'rgba(255,94,94,0.8)', chg:'rgba(255,94,94,0.5)'},
+    {bg:'rgba(255,94,94,0.18)',  border:'rgba(255,94,94,0.35)', mo:'rgba(255,94,94,0.55)', val:'#ff5e5e', chg:'rgba(255,94,94,0.7)'},
   ];
   scenarios.forEach((sc,i)=>{
     const bal12=Math.round(cb+(sc.in-sc.out)*12);
@@ -529,17 +537,18 @@ function buildFc(){
     fcc.innerHTML+=`<div class="fcc" style="background:${cs.bg};border:1px solid ${cs.border};">
       <div class="fcc-mo" style="color:${cs.mo}">${sc.label}</div>
       <div class="fcc-val" style="color:${cs.val}">${fmtK(bal12)}원</div>
-      <div class="fcc-chg" style="color:${cs.chg}">${isP?\'▲\':\'▼\'} ${fmtK(Math.abs(chg))}</div>
-      <div style="font-size:10px;margin-top:4px;color:${cs.chg};opacity:0.8;">월 ${isP?\'+\':\'\'  }${fmtK(netMo)}</div>
+      <div class="fcc-chg" style="color:${cs.chg}">${isP?'▲':'▼'} ${fmtK(Math.abs(chg))}</div>
+      <div style="font-size:10px;margin-top:4px;color:${cs.chg};opacity:0.8;">월 ${isP?'+':''}${fmtK(netMo)}</div>
     </div>`;
   });
 }
 
 function buildPaySelect(){
-  const sel=document.getElementById(\'pay-select\');
-  sel.innerHTML=\'\';
+  const sel=document.getElementById('pay-select');
+  sel.innerHTML='';
+  // 최신 월이 맨 위로
   [...D.pay_months].reverse().forEach(ym=>{
-    const opt=document.createElement(\'option\');
+    const opt=document.createElement('option');
     opt.value=ym; opt.textContent=ym;
     if(ym===D.summary.latest_ym) opt.selected=true;
     sel.appendChild(opt);
@@ -550,15 +559,16 @@ function buildMembers(ym){
   ym=ym||D.summary.latest_ym;
   const ms=D.payment_by_month[ym]||[];
   const pc=ms.filter(m=>m.paid).length;
-  document.getElementById(\'pay-count\').innerHTML=`<span style="color:#00D4A0;font-weight:500">${pc}명</span> / ${ms.length}명 납부완료`;
-  const g=document.getElementById(\'mgrid\'); g.innerHTML=\'\';
+  document.getElementById('pay-count').innerHTML=`<span style="color:#00D4A0;font-weight:500">${pc}명</span> / ${ms.length}명 납부완료`;
+  const g=document.getElementById('mgrid'); g.innerHTML='';
+  // 납부자 먼저, 미납자 뒤에
   const sorted=[...ms].sort((a,b)=>b.paid-a.paid);
   sorted.forEach(m=>{
-    const c=m.paid?\'paid\':\'unpaid\';
+    const c=m.paid?'paid':'unpaid';
     g.innerHTML+=`<div class="mc ${c}">
       <div class="mc-av">${m.name[0]}</div>
       <div class="mc-name">${m.name}</div>
-      <span class="mc-tag">${m.paid?\'납부\':\'미납\'}</span>
+      <span class="mc-tag">${m.paid?'납부':'미납'}</span>
     </div>`;
   });
 }
@@ -566,15 +576,15 @@ function buildMembers(ym){
 function onPaySelect(ym){ buildMembers(ym); }
 
 function buildTL(){
-  const t=document.getElementById(\'tl\'); t.innerHTML=\'\';
+  const t=document.getElementById('tl'); t.innerHTML='';
   D.recent.forEach(r=>{
-    const cls=r.is_income?\'in\':\'out\',sign=r.is_income?\'+\':\'-\';
-    const icon=r.is_income?\'↑\':\'↓\';
+    const cls=r.is_income?'in':'out',sign=r.is_income?'+':'-';
+    const icon=r.is_income?'↑':'↓';
     t.innerHTML+=`<div class="tl-item">
       <div class="tl-icon ${cls}">${icon}</div>
       <div class="tl-body">
         <div class="tl-row1">
-          <span class="tl-memo">${r.memo||\'—\'}</span>
+          <span class="tl-memo">${r.memo||'—'}</span>
           <span class="tl-amt ${cls}">${sign}${fmtFull(r.amount)}원</span>
         </div>
         <div class="tl-row2">
@@ -586,7 +596,8 @@ function buildTL(){
   });
 }
 
-function setMode(m,b){mode=m;document.querySelectorAll(\'.tab\').forEach(t=>t.classList.remove(\'on\'));b.classList.add(\'on\');buildMain();}
+function setMode(m,b){mode=m;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));b.classList.add('on');buildMain();}
+
 
 init();
 </script>
@@ -610,10 +621,48 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200);self.send_header('Content-Type','text/html;charset=utf-8');self.send_header('Content-Length',len(body));self.end_headers();self.wfile.write(body)
 
 if __name__=='__main__':
-    port = int(os.environ.get('PORT', 8888))
-    server = HTTPServer(('0.0.0.0', port), Handler)
-    print(f'사군자 대시보드 실행 중: http://0.0.0.0:{port}')
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print('\n서버 종료.')
+    import socket, webbrowser, threading, time, sys
+
+    # Render는 PORT 환경변수로 포트를 지정함
+    env_port = os.environ.get('PORT')
+    if env_port:
+        port = int(env_port)
+        server = HTTPServer(('0.0.0.0', port), Handler)
+        print(f'사군자 대시보드 실행 중: http://0.0.0.0:{port}')
+        try: server.serve_forever()
+        except KeyboardInterrupt: print('\n서버 종료.')
+    else:
+        # 로컬 실행: 빈 포트 자동 탐색 + 브라우저 자동 열기
+        def find_free_port(start=8000):
+            for p in range(start, start+10):
+                try:
+                    s=socket.socket(); s.bind(('',p)); s.close(); return p
+                except: continue
+            return start
+
+        start_port = 8000
+        for i, arg in enumerate(sys.argv):
+            if arg == '--port' and i+1 < len(sys.argv):
+                start_port = int(sys.argv[i+1])
+
+        port = find_free_port(start_port)
+        url  = f'http://localhost:{port}'
+
+        try:
+            server = HTTPServer(('0.0.0.0', port), Handler)
+        except OSError:
+            print(f'포트 {port} 사용 중. 브라우저에서 {url} 을 열어보세요.')
+            webbrowser.open(url); exit()
+
+        threading.Thread(target=lambda: (time.sleep(1.2), webbrowser.open(url)), daemon=True).start()
+
+        print(f"""
+  ╔══════════════════════════════════════╗
+  ║   사군자 회비 대시보드 실행 중        ║
+  ╠══════════════════════════════════════╣
+  ║  주소:  {url:<28} ║
+  ║  종료:  Ctrl+C  또는 창 닫기         ║
+  ╚══════════════════════════════════════╝
+""")
+        try: server.serve_forever()
+        except KeyboardInterrupt: print('\n  서버 종료.')
