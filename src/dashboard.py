@@ -463,9 +463,13 @@ function buildFc(){
 
   // 각 시나리오별 12개월 포인트 계산
   const hist=real.slice(-5);
+  const lastM=hist[hist.length-1]?.month||'';
+  const lm=lastM.match(/(\d+)년 (\d+)월/);
+  let baseYY=lm?parseInt(lm[1]):26, baseMM=lm?parseInt(lm[2]):5;
   const fcLabels=[];
   for(let i=1;i<=12;i++){
-    const bm=4+i,yy=26+Math.floor((bm-1)/12),mm=((bm-1)%12)+1;
+    let mm=baseMM+i,yy=baseYY+Math.floor((mm-1)/12);
+    mm=((mm-1)%12)+1;
     fcLabels.push(`${yy%100}년 ${mm}월`);
   }
   const allL=[...hist.map(m=>m.month),...fcLabels];
