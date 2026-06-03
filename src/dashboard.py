@@ -610,6 +610,12 @@ init();
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self,f,*a): pass
+    def do_HEAD(self):
+        p=urlparse(self.path).path
+        if p=='/api/data':
+            self.send_response(200);self.send_header('Content-Type','application/json;charset=utf-8');self.end_headers()
+        else:
+            self.send_response(200);self.send_header('Content-Type','text/html;charset=utf-8');self.end_headers()
     def do_GET(self):
         p=urlparse(self.path).path
         if p=='/api/data':
