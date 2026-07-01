@@ -93,7 +93,7 @@ def build_data():
     expense_by_cat={}; expense_by_month={}
     for r in rows:
         if r['분류1']=='출금' and r['차변']>0:
-            net = r['차변'] - max(r['대변'], 0)  # 대변(환불)이 있으면 차감
+            net = r['차변'] - (r['대변'] if r['대변'] else 0)  # 대변(환불/환급)이 있으면 차감, 음수도 반영
             expense_by_cat[r['분류2']]=expense_by_cat.get(r['분류2'],0)+net
             expense_by_month[r['연월']]=expense_by_month.get(r['연월'],0)+net
     total_in=sum(income_by_month.values())+sum(extra_income.values())
