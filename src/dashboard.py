@@ -153,19 +153,19 @@ HTML = '''<!DOCTYPE html>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{
-  --bg:#080808;
-  --s1:#111111;
-  --s2:#161616;
-  --s3:#1c1c1c;
-  --line:rgba(255,255,255,0.08);
-  --line2:rgba(255,255,255,0.14);
+  --bg:#0E0F12;
+  --s1:#16181D;
+  --s2:#1B1E24;
+  --s3:#20232A;
+  --line:rgba(232,232,234,0.07);
+  --line2:rgba(232,232,234,0.13);
   --p:#00D4A0;
   --p-dim:rgba(0,212,160,0.10);
   --p-dim2:rgba(0,212,160,0.18);
-  --w:#ffffff;
-  --w2:rgba(255,255,255,0.7);
-  --w3:rgba(255,255,255,0.35);
-  --w4:rgba(255,255,255,0.15);
+  --w:#E8E8EA;
+  --w2:rgba(232,232,234,0.68);
+  --w3:rgba(232,232,234,0.38);
+  --w4:rgba(232,232,234,0.16);
   --neg:#ff5e5e;
   --neg-dim:rgba(255,94,94,0.10);
   --fc-pos:#4da3ff;
@@ -182,144 +182,129 @@ body{background:var(--bg);color:var(--w);font-family:'DM Sans',sans-serif;font-w
 /* NAV */
 nav{
   position:sticky;top:0;z-index:50;
-  background:rgba(8,8,8,0.8);
+  background:rgba(14,15,18,0.82);
   backdrop-filter:blur(24px);
   border-bottom:1px solid var(--line);
   padding:0 28px;
   height:52px;
   display:flex;align-items:center;justify-content:space-between;
 }
-.nav-logo{font-family:'DM Serif Display',serif;font-size:17px;color:var(--w);letter-spacing:0.3px;}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:16px;color:var(--w2);letter-spacing:0.3px;}
 .nav-logo em{color:var(--p);font-style:normal;}
 .nav-right{display:flex;align-items:center;gap:14px;}
-.nav-time{font-size:11px;color:var(--w3);letter-spacing:0.5px;}
+.nav-time{font-size:11px;color:var(--w4);letter-spacing:0.5px;font-variant-numeric:tabular-nums;}
 .nav-btn{background:transparent;border:1px solid var(--line2);color:var(--w3);padding:5px 14px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;letter-spacing:0.8px;transition:border-color .2s,color .2s;}
 .nav-btn:hover{border-color:var(--p);color:var(--p);}
 
-.page{max-width:760px;margin:0 auto;padding:32px 20px 80px;}
+.page{max-width:720px;margin:0 auto;padding:40px 20px 80px;}
 
-/* HERO BLOCK */
-.hero{margin-bottom:20px;}
-.hero-eyebrow{font-size:10px;letter-spacing:2.5px;color:var(--w3);text-transform:uppercase;margin-bottom:14px;}
-.hero-main{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
-.hero-num{font-family:'DM Serif Display',serif;font-size:58px;line-height:1;letter-spacing:-2px;color:var(--w);}
-.hero-num sup{font-size:22px;letter-spacing:0;vertical-align:super;color:var(--w2);}
-.hero-meta{text-align:right;}
-.hero-meta-period{font-size:11px;color:var(--w3);margin-bottom:6px;}
-.hero-meta-net{font-size:13px;color:var(--p);font-weight:500;}
-.hero-divider{height:1px;background:var(--line);margin-bottom:20px;}
-.hero-groups{display:flex;flex-direction:column;gap:12px;}
-.hgroup{border-radius:12px;padding:14px 18px;}
-.hgroup-cum{padding:0 0 2px;}
-.hgroup-trend{background:var(--s2);border:1px solid var(--line);}
-.hgroup-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.hgroup-lbl{font-size:10px;letter-spacing:1.5px;color:var(--w3);text-transform:uppercase;}
-.hero-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0;}
-.hstat{padding:0 20px;}
-.hstat.first{padding-left:0;}
-.hstat.last{padding-right:0;}
-.hstat+.hstat{border-left:1px solid var(--line);}
-.hstat-lbl{font-size:10px;letter-spacing:1.5px;color:var(--w3);text-transform:uppercase;margin-bottom:6px;}
-.hstat-note{font-size:8px;letter-spacing:0.2px;color:var(--w4);text-transform:none;margin-left:5px;}
-.hstat-val{font-size:22px;font-weight:300;color:var(--w);}
-.hstat-sub{font-size:10px;color:var(--w3);margin-top:3px;}
-.hgroup-trend .hstat-val{font-size:19px;color:var(--w2);}
+/* TIER 1 — HERO (압도적 주인공) */
+.t-hero{padding:8px 0 4px;}
+.t-hero-eyebrow{font-size:10px;letter-spacing:3px;color:var(--w4);text-transform:uppercase;margin-bottom:14px;}
+.t-hero-num{font-family:'DM Serif Display',serif;font-size:80px;line-height:1;letter-spacing:-3px;color:var(--w);font-variant-numeric:tabular-nums;}
+.t-hero-num sup{font-size:28px;letter-spacing:0;vertical-align:super;color:var(--w3);margin-right:3px;}
+.t-hero-meta{margin-top:16px;font-size:13px;color:var(--w4);display:flex;align-items:center;gap:9px;}
+.t-hero-dot{color:var(--w4);}
+#h-net{color:var(--p);font-weight:500;}
+#h-net.neg{color:var(--neg);}
 
-/* SECTION */
-.sec{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:14px;}
-.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-.sec-title{font-size:10px;letter-spacing:2px;color:var(--w3);text-transform:uppercase;}
+/* TIER 2 — 이번달 흐름 (중간) */
+.t-month{padding:28px 0 26px;border-top:1px solid var(--line);margin-top:24px;}
+.t-month-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+.t-month-title{font-size:11px;letter-spacing:1.5px;color:var(--w2);text-transform:uppercase;font-weight:500;}
+.t-month-period{font-size:11px;color:var(--w4);}
+.t-month-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.t-month-lbl{font-size:10px;color:var(--w4);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:7px;}
+.t-month-val{font-size:28px;font-weight:300;color:var(--w2);letter-spacing:-0.8px;font-variant-numeric:tabular-nums;}
+#m-in{color:var(--p);}
+.t-month-val.pos{color:var(--p);}
+.t-month-val.neg{color:var(--neg);}
 
-/* TABS */
-.tabs{display:flex;gap:2px;background:var(--s3);padding:3px;border-radius:8px;}
-.tab{font-size:11px;padding:4px 12px;border-radius:6px;border:none;background:transparent;color:var(--w3);cursor:pointer;font-family:inherit;letter-spacing:0.3px;transition:all .15s;}
-.tab.on{background:var(--s2);color:var(--w);border:1px solid var(--line2);}
+/* TIER 3 — 상세 (작게 · 옅게, 박스 대신 헤어라인+여백) */
+.t-detail{padding-top:4px;}
+.d-block{padding:26px 0;border-top:1px solid var(--line);}
+.d-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:10px;flex-wrap:wrap;}
+.d-title{font-size:10px;letter-spacing:2px;color:var(--w4);text-transform:uppercase;}
+.d-row{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
+.d-stat{display:flex;flex-direction:column;gap:4px;}
+.d-stat-lbl{font-size:10px;letter-spacing:1px;color:var(--w4);text-transform:uppercase;}
+.d-stat-note{font-size:8px;color:var(--w4);text-transform:none;margin-left:5px;letter-spacing:0.2px;opacity:0.7;}
+.d-stat-val{font-size:19px;font-weight:300;color:var(--w2);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;}
+.d-stat-sub{font-size:10px;color:var(--w4);}
+
+/* TABS / SELECT */
+.tabs{display:flex;gap:2px;background:var(--s2);padding:3px;border-radius:8px;}
+.tab{font-size:11px;padding:4px 12px;border-radius:6px;border:none;background:transparent;color:var(--w4);cursor:pointer;font-family:inherit;letter-spacing:0.3px;transition:all .15s;}
+.tab.on{background:var(--s3);color:var(--w2);border:1px solid var(--line2);}
+.sel{background:var(--s2);border:1px solid var(--line2);color:var(--w3);padding:5px 10px;border-radius:6px;font-size:11px;font-family:inherit;cursor:pointer;outline:none;}
 
 /* CHART */
-.chart-box{position:relative;width:100%;height:200px;}
-.chart-box-lg{position:relative;width:100%;height:230px;}
+.chart-box{position:relative;width:100%;height:190px;}
+.chart-box-lg{position:relative;width:100%;height:220px;}
+.leg-row{display:flex;gap:18px;margin-bottom:14px;}
+.leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--w4);}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.fc-desc{font-size:11px;color:var(--w4);margin-bottom:16px;letter-spacing:0.2px;line-height:1.7;}
 
-/* LEGEND */
-.leg-row{display:flex;gap:16px;margin-bottom:12px;}
-.leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--w3);}
-.leg-line{width:18px;height:2px;border-radius:1px;}
-
-/* FORECAST */
-.sc-pills{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
-.sc-pill{font-size:11px;padding:5px 13px;border-radius:6px;border:1px solid var(--line2);background:transparent;color:var(--w3);cursor:pointer;font-family:inherit;letter-spacing:0.3px;transition:all .15s;}
-.sc-pill.on{background:var(--p-dim2);color:var(--p);border-color:rgba(0,212,160,0.3);}
-.fc-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:16px;}
-.fcc{border-radius:10px;padding:14px 16px;}
-.fcc-mo{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
-.fcc-val{font-size:18px;font-weight:300;margin-bottom:4px;}
-.fcc-chg{font-size:11px;}
-.fcc.pos{background:var(--fc-pos-dim);border:1px solid rgba(77,163,255,0.15);}
-.fcc.pos .fcc-mo{color:rgba(77,163,255,0.5);}
-.fcc.pos .fcc-val{color:var(--fc-pos);}
-.fcc.pos .fcc-chg{color:rgba(77,163,255,0.6);}
-.fcc.neg{background:var(--fc-neg-dim);border:1px solid rgba(255,176,32,0.15);}
-.fcc.neg .fcc-mo{color:rgba(255,176,32,0.5);}
-.fcc.neg .fcc-val{color:var(--fc-neg);}
-.fcc.neg .fcc-chg{color:rgba(255,176,32,0.6);}
-
-/* 2COL */
-.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+/* 2COL DETAIL */
+.d-two{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.d-two-col+.d-two-col{padding-left:28px;border-left:1px solid var(--line);}
 
 /* MEMBER GRID */
-.pay-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;}
-.pay-ym{font-size:12px;color:var(--p);font-weight:500;letter-spacing:0.3px;}
-.pay-count{font-size:11px;color:var(--w3);}
+.pay-toprow{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
+.pay-count{font-size:11px;color:var(--w4);}
 .pay-count span{color:var(--w2);}
+.copy-box{cursor:pointer;background:var(--p-dim);border:1px solid rgba(0,212,160,0.2);border-radius:8px;padding:6px 12px;text-align:right;transition:border-color .2s,background .2s;flex-shrink:0;}
+.copy-box.copied{background:rgba(0,212,160,0.2);border-color:rgba(0,212,160,0.5);}
+.copy-lbl{font-size:9px;color:rgba(0,212,160,0.6);letter-spacing:0.6px;margin-bottom:2px;}
+.copy-num{font-size:12px;font-weight:500;color:var(--p);letter-spacing:0.8px;font-variant-numeric:tabular-nums;}
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .mc{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px;border-radius:10px;border:1px solid var(--line);min-width:0;}
-.mc.paid{background:var(--p-dim);border-color:rgba(0,212,160,0.2);}
-.mc.unpaid{background:var(--s3);}
-.mc-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;}
-.mc.paid .mc-av{background:rgba(0,212,160,0.2);color:var(--p);}
-.mc.unpaid .mc-av{background:rgba(255,255,255,0.06);color:var(--w3);}
+.mc.paid{background:var(--p-dim);border-color:rgba(0,212,160,0.18);}
+.mc.unpaid{background:transparent;}
+.mc-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;}
+.mc.paid .mc-av{background:rgba(0,212,160,0.18);color:var(--p);}
+.mc.unpaid .mc-av{background:rgba(232,232,234,0.05);color:var(--w4);}
 .mc-name{font-size:10px;letter-spacing:-0.2px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.mc.paid .mc-name{color:var(--w);}
-.mc.unpaid .mc-name{color:var(--w3);}
+.mc.paid .mc-name{color:var(--w2);}
+.mc.unpaid .mc-name{color:var(--w4);}
 .mc-tag{font-size:9px;padding:2px 7px;border-radius:4px;font-weight:500;letter-spacing:0.3px;}
 .mc.paid .mc-tag{background:rgba(0,212,160,0.15);color:var(--p);}
-.mc.unpaid .mc-tag{background:rgba(255,255,255,0.05);color:var(--w4);}
+.mc.unpaid .mc-tag{background:rgba(232,232,234,0.04);color:var(--w4);}
 
 /* TIMELINE */
 .tl{display:flex;flex-direction:column;}
-.tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
+.tl-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);}
 .tl-item:last-child{border-bottom:none;}
-.tl-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px;}
+.tl-icon{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:1px;}
 .tl-icon.in{background:var(--p-dim2);}
 .tl-icon.out{background:var(--neg-dim);}
 .tl-body{flex:1;min-width:0;}
 .tl-row1{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:3px;}
-.tl-memo{font-size:12px;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
-.tl-amt{font-size:13px;font-weight:500;flex-shrink:0;}
+.tl-memo{font-size:12px;color:var(--w2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+.tl-amt{font-size:13px;font-weight:500;flex-shrink:0;letter-spacing:-0.2px;font-variant-numeric:tabular-nums;}
 .tl-amt.in{color:var(--p);}
 .tl-amt.out{color:var(--neg);}
 .tl-row2{display:flex;align-items:center;gap:7px;}
-.tl-date{font-size:10px;color:var(--w3);}
+.tl-date{font-size:10px;color:var(--w4);font-variant-numeric:tabular-nums;}
 .tl-tag{font-size:9px;padding:2px 7px;border-radius:4px;letter-spacing:0.2px;}
-.tag-모임비{background:rgba(255,255,255,0.06);color:var(--w3);}
+.tag-모임비{background:rgba(232,232,234,0.05);color:var(--w4);}
 .tag-회비{background:var(--p-dim);color:var(--p);}
-.tag-경조사비{background:rgba(248,190,100,0.1);color:#f8be64;}
-.tag-강연비{background:rgba(168,139,250,0.1);color:#a88bfa;}
-.tag-경품비{background:rgba(255,111,168,0.10);color:#ff6fa8;}
-.tag-지각비{background:rgba(0,212,160,0.07);color:rgba(0,212,160,0.6);}
-.tag-이자{background:rgba(255,255,255,0.05);color:var(--w3);}
-.tag-기타{background:rgba(255,255,255,0.05);color:var(--w3);}
+.tag-경조사비{background:rgba(232,232,234,0.07);color:var(--w3);}
+.tag-강연비{background:rgba(232,232,234,0.07);color:var(--w3);}
+.tag-경품비{background:rgba(232,232,234,0.07);color:var(--w3);}
+.tag-지각비{background:var(--p-dim);color:rgba(0,212,160,0.6);}
+.tag-이자{background:rgba(232,232,234,0.04);color:var(--w4);}
+.tag-기타{background:rgba(232,232,234,0.04);color:var(--w4);}
 
 @media(max-width:580px){
-  .two{grid-template-columns:1fr;}
-  .hero-num{font-size:44px;}
-  .hstat-val{font-size:18px;}
-  .hgroup-trend .hstat-val{font-size:16px;}
+  .t-hero-num{font-size:50px;letter-spacing:-1.5px;}
+  .t-month-val{font-size:19px;}
+  .t-month-row{gap:10px;}
+  .d-two{grid-template-columns:1fr;}
+  .d-two-col+.d-two-col{padding-left:0;border-left:none;border-top:1px solid var(--line);padding-top:24px;margin-top:24px;}
   .mgrid{grid-template-columns:repeat(3,1fr);}
-  .fc-row{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:128px;overflow-x:auto;gap:8px;padding-bottom:6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-  .fc-row::-webkit-scrollbar{display:none;}
-  .fcc{scroll-snap-align:start;}
-  .hstat{padding:0 10px;}
-  .hgroup-head{flex-wrap:wrap;gap:8px;}
+  .d-head{flex-wrap:wrap;gap:8px;}
 }
 </style>
 </head>
@@ -335,111 +320,154 @@ nav{
 
 <div class="page">
 
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-eyebrow">Fund Balance</div>
-    <div class="hero-main">
-      <div class="hero-num"><sup>₩</sup><span id="h-bal">—</span></div>
-      <div class="hero-meta">
-        <div class="hero-meta-period" id="h-period">—</div>
-        <div class="hero-meta-net" id="h-net">—</div>
-      </div>
+  <!-- TIER 1: HERO -->
+  <section class="t-hero">
+    <div class="t-hero-eyebrow">Fund Balance</div>
+    <div class="t-hero-num"><sup>₩</sup><span id="h-bal">0</span></div>
+    <div class="t-hero-meta">
+      <span id="h-period">—</span>
+      <span class="t-hero-dot">·</span>
+      <span id="h-net">—</span>
     </div>
-    <div class="hero-divider"></div>
-    <div class="hero-groups">
-      <div class="hgroup hgroup-cum">
-        <div class="hgroup-lbl">누적 총계</div>
-        <div class="hero-stats">
-          <div class="hstat first">
-            <div class="hstat-lbl">Total In</div>
-            <div class="hstat-val" id="h-in">—</div>
-            <div class="hstat-sub">회비 + 지각비 + 이자</div>
-          </div>
-          <div class="hstat last">
-            <div class="hstat-lbl">Total Out</div>
-            <div class="hstat-val" id="h-out">—</div>
-            <div class="hstat-sub">모임비 + 경조사비 외</div>
-          </div>
-        </div>
-      </div>
-      <div class="hgroup hgroup-trend">
-        <div class="hgroup-head">
-          <span class="hgroup-lbl">최근 추세 · 평균 기준</span>
-          <div class="tabs" id="avg-toggle">
-            <button class="tab" data-n="3" onclick="setAvgPeriod(3,this)">3개월</button>
-            <button class="tab on" data-n="6" onclick="setAvgPeriod(6,this)">6개월</button>
-            <button class="tab" data-n="12" onclick="setAvgPeriod(12,this)">12개월</button>
-          </div>
-        </div>
-        <div class="hero-stats">
-          <div class="hstat first">
-            <div class="hstat-lbl">월 평균 입금</div>
-            <div class="hstat-val" id="h-avg-in">—</div>
-            <div class="hstat-sub" id="h-avg-in-sub">—</div>
-          </div>
-          <div class="hstat last">
-            <div class="hstat-lbl">월 평균 모임비<span class="hstat-note">경조사비 제외</span></div>
-            <div class="hstat-val" id="h-avg-out">—</div>
-            <div class="hstat-sub" id="h-avg-out-sub">—</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  </section>
 
-  <!-- 월별 차트 -->
-  <div class="sec">
-    <div class="sec-head">
-      <span class="sec-title">Monthly Flow</span>
-      <div class="tabs">
-        <button class="tab on" onclick="setMode('bar',this)">막대</button>
-        <button class="tab" onclick="setMode('line',this)">추세</button>
-        <button class="tab" onclick="setMode('cum',this)">누적</button>
+  <!-- TIER 2: 이번달 흐름 -->
+  <section class="t-month">
+    <div class="t-month-head">
+      <span class="t-month-title">이번달 흐름</span>
+      <span class="t-month-period" id="m-period">—</span>
+    </div>
+    <div class="t-month-row">
+      <div>
+        <div class="t-month-lbl">입금</div>
+        <div class="t-month-val" id="m-in">—</div>
+      </div>
+      <div>
+        <div class="t-month-lbl">지출</div>
+        <div class="t-month-val" id="m-out">—</div>
+      </div>
+      <div>
+        <div class="t-month-lbl">순증감</div>
+        <div class="t-month-val" id="m-net">—</div>
       </div>
     </div>
-    <div class="leg-row">
-      <span class="leg"><span class="leg-line" style="background:#00D4A0"></span>입금</span>
-      <span class="leg"><span class="leg-line" style="background:#ff5e5e"></span>출금</span>
-      <span class="leg"><span class="leg-line" style="background:rgba(255,255,255,0.35);border-top:1px dashed rgba(255,255,255,0.35);height:0"></span>누적잔액</span>
-    </div>
-    <div class="chart-box"><canvas id="mainC"></canvas></div>
-  </div>
+  </section>
 
-  <!-- 전망 -->
-  <div class="sec">
-    <div class="sec-head"><span class="sec-title">Balance Forecast</span></div>
-    <div id="fc-desc" style="font-size:10px;color:rgba(255,255,255,0.28);margin-bottom:14px;letter-spacing:0.2px;line-height:1.6;"></div>
-    <div class="chart-box-lg"><canvas id="fcC"></canvas></div>
-    <div class="fc-row" id="fc-cards"></div>
-  </div>
+  <!-- TIER 3: 상세 -->
+  <section class="t-detail">
 
-  <!-- 멤버 + 타임라인 -->
-  <div class="two">
-    <div class="sec" style="margin-bottom:0">
-      <div class="sec-head">
-        <span class="sec-title">Monthly Payment</span>
-        <select id="pay-select" onchange="onPaySelect(this.value)" style="background:#1c1c1c;border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.7);padding:4px 10px;border-radius:6px;font-size:11px;font-family:inherit;cursor:pointer;outline:none;"></select>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <span class="pay-count" id="pay-count">—</span>
-        <div id="copy-acc" onclick="copyAccount()" title="클릭하면 계좌번호 복사" style="cursor:pointer;background:rgba(0,212,160,0.08);border:1px solid rgba(0,212,160,0.2);border-radius:8px;padding:5px 11px;text-align:right;transition:border-color .2s,background .2s;">
-          <div style="font-size:9px;color:rgba(0,212,160,0.6);letter-spacing:0.8px;margin-bottom:2px;">카카오뱅크 · 조현민</div>
-          <div id="acc-num" style="font-size:12px;font-weight:500;color:#00D4A0;letter-spacing:1px;">7979-0864-002</div>
+    <div class="d-block">
+      <div class="d-head"><span class="d-title">누적 총계</span></div>
+      <div class="d-row">
+        <div class="d-stat">
+          <span class="d-stat-lbl">Total In</span>
+          <span class="d-stat-val" id="h-in">—</span>
+          <span class="d-stat-sub">회비 + 지각비 + 이자</span>
+        </div>
+        <div class="d-stat">
+          <span class="d-stat-lbl">Total Out</span>
+          <span class="d-stat-val" id="h-out">—</span>
+          <span class="d-stat-sub">모임비 + 경조사비 외</span>
         </div>
       </div>
-      <div class="mgrid" id="mgrid"></div>
     </div>
-    <div class="sec" style="margin-bottom:0">
-      <div class="sec-head"><span class="sec-title">Recent Transactions</span></div>
-      <div class="tl" id="tl"></div>
+
+    <div class="d-block">
+      <div class="d-head">
+        <span class="d-title">최근 추세 평균</span>
+        <div class="tabs" id="avg-toggle">
+          <button class="tab" data-n="3" onclick="setAvgPeriod(3,this)">3개월</button>
+          <button class="tab on" data-n="6" onclick="setAvgPeriod(6,this)">6개월</button>
+          <button class="tab" data-n="12" onclick="setAvgPeriod(12,this)">12개월</button>
+        </div>
+      </div>
+      <div class="d-row">
+        <div class="d-stat">
+          <span class="d-stat-lbl">월 평균 입금</span>
+          <span class="d-stat-val" id="h-avg-in">—</span>
+          <span class="d-stat-sub" id="h-avg-in-sub">—</span>
+        </div>
+        <div class="d-stat">
+          <span class="d-stat-lbl">월 평균 모임비<span class="d-stat-note">경조사비 제외</span></span>
+          <span class="d-stat-val" id="h-avg-out">—</span>
+          <span class="d-stat-sub" id="h-avg-out-sub">—</span>
+        </div>
+      </div>
     </div>
-  </div>
+
+    <div class="d-block">
+      <div class="d-head">
+        <span class="d-title">Monthly Flow</span>
+        <div class="tabs">
+          <button class="tab on" onclick="setMode('bar',this)">막대</button>
+          <button class="tab" onclick="setMode('line',this)">추세</button>
+          <button class="tab" onclick="setMode('cum',this)">누적</button>
+        </div>
+      </div>
+      <div class="leg-row">
+        <span class="leg"><span class="leg-dot" style="background:#00D4A0"></span>입금</span>
+        <span class="leg"><span class="leg-dot" style="background:#ff5e5e"></span>출금</span>
+      </div>
+      <div class="chart-box"><canvas id="mainC"></canvas></div>
+    </div>
+
+    <div class="d-block">
+      <div class="d-head"><span class="d-title">Balance Forecast</span></div>
+      <div id="fc-desc" class="fc-desc"></div>
+      <div class="chart-box-lg"><canvas id="fcC"></canvas></div>
+    </div>
+
+    <div class="d-block">
+      <div class="d-two">
+        <div class="d-two-col">
+          <div class="d-head">
+            <span class="d-title">Monthly Payment</span>
+            <select id="pay-select" onchange="onPaySelect(this.value)" class="sel"></select>
+          </div>
+          <div class="pay-toprow">
+            <span class="pay-count" id="pay-count">—</span>
+            <div id="copy-acc" onclick="copyAccount()" title="클릭하면 계좌번호 복사" class="copy-box">
+              <div class="copy-lbl">카카오뱅크 · 조현민</div>
+              <div id="acc-num" class="copy-num">7979-0864-002</div>
+            </div>
+          </div>
+          <div class="mgrid" id="mgrid"></div>
+        </div>
+        <div class="d-two-col">
+          <div class="d-head"><span class="d-title">Recent Transactions</span></div>
+          <div class="tl" id="tl"></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
 
 </div>
 
 <script>
 const fmtFull = n => Math.round(Math.abs(n)).toLocaleString('ko-KR');
-const fmtK    = n => { const a=Math.abs(Math.round(n)); return a>=1000000?(a/1000000).toFixed(1)+'M':a>=10000?(a/10000).toFixed(0)+'만':a.toLocaleString(); };
+const fmtK = n => {
+  const a = Math.round(Math.abs(n));
+  if(a >= 100000000){
+    const eok = Math.floor(a/100000000);
+    const man = Math.round((a%100000000)/10000);
+    return man>0 ? `${eok}억 ${man.toLocaleString('ko-KR')}만` : `${eok}억`;
+  }
+  if(a >= 10000) return Math.round(a/10000).toLocaleString('ko-KR')+'만';
+  return a.toLocaleString('ko-KR');
+};
+
+function animateNum(el, target, fmt, dur=700){
+  if(el.__timer) clearTimeout(el.__timer);
+  const t0=Date.now();
+  function step(){
+    const p=Math.min((Date.now()-t0)/dur,1);
+    const e=1-Math.pow(1-p,3);
+    el.textContent=fmt(target*e);
+    if(p<1) el.__timer=setTimeout(step,16);
+  }
+  step();
+}
 
 let D=null, MC=null, FC=null, mode='bar', avgPeriod=6;
 
@@ -459,26 +487,41 @@ function copyAccount(){
   const box=document.getElementById('copy-acc'), num=document.getElementById('acc-num');
   const orig=num.textContent;
   num.textContent='✓ 복사완료';
-  box.style.background='rgba(0,212,160,0.18)';
-  box.style.borderColor='rgba(0,212,160,0.5)';
+  box.classList.add('copied');
   clearTimeout(window.__copyTimer);
   window.__copyTimer=setTimeout(()=>{
     num.textContent=orig;
-    box.style.background='rgba(0,212,160,0.08)';
-    box.style.borderColor='rgba(0,212,160,0.2)';
+    box.classList.remove('copied');
   },1500);
 }
 
 function render(){
   const s=D.summary;
   document.getElementById('nav-time').textContent=s.updated;
-  document.getElementById('h-bal').textContent=fmtFull(s.balance);
+  animateNum(document.getElementById('h-bal'), s.balance, fmtFull);
+
   const real=D.monthly.filter(m=>m.income>0||m.expense>0);
   document.getElementById('h-period').textContent=real.length?`${real[0].month} — ${real[real.length-1].month}`:'';
   const net=s.total_in-s.total_out;
-  document.getElementById('h-net').textContent=(net>=0?'▲ +':'▼ ')+fmtK(net)+'원 순증';
-  document.getElementById('h-in').textContent=fmtK(s.total_in)+'원';
-  document.getElementById('h-out').textContent=fmtK(s.total_out)+'원';
+  const netEl=document.getElementById('h-net');
+  netEl.classList.toggle('neg', net<0);
+  netEl.textContent=(net>=0?'▲ +':'▼ ')+fmtK(net)+'원 순증';
+
+  animateNum(document.getElementById('h-in'), s.total_in, v=>fmtK(v)+'원');
+  animateNum(document.getElementById('h-out'), s.total_out, v=>fmtK(v)+'원');
+
+  const cur=real[real.length-1];
+  if(cur){
+    const netCur=cur.income-cur.expense;
+    document.getElementById('m-period').textContent=cur.month;
+    animateNum(document.getElementById('m-in'), cur.income, v=>fmtK(v)+'원');
+    animateNum(document.getElementById('m-out'), cur.expense, v=>fmtK(v)+'원');
+    const mNet=document.getElementById('m-net');
+    mNet.classList.remove('pos','neg');
+    mNet.classList.add(netCur>=0?'pos':'neg');
+    animateNum(mNet, netCur, v=>(v>=0?'+':'-')+fmtK(v)+'원');
+  }
+
   updateAvgCards();
   buildMain(); buildFc(); buildPaySelect(); buildMembers(); buildTL();
 }
@@ -522,8 +565,8 @@ function buildMain(){
         animation:{duration:500,easing:'easeOutQuart'},
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtK(c.raw)+'원'}}},
         scales:{
-          x:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},
-          y:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}
+          x:{ticks:{color:'rgba(232,232,234,0.28)',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},
+          y:{ticks:{color:'rgba(232,232,234,0.28)',font:{size:10},callback:v=>fmtK(v)},grid:{color:'rgba(232,232,234,0.05)'},border:{display:false}}
         }}
     });
   }
@@ -549,16 +592,8 @@ function buildFc(){
   const excluded=loVals.length-loFiltered.length;
   const cb=D.summary.balance;
 
-  // 5개 시나리오 — 블루(절약) ↔ 앰버(지출과다) 그라데이션. 실제 입금/출금(초록·빨강)과 구분되는 별도 색조.
-  const scenarios=[
-    {label:'지출 -20%', in:ai, out:Math.round(ao*0.8), color:'rgba(77,163,255,1.0)',  dim:'rgba(77,163,255,0.07)',  dash:[]},
-    {label:'지출 -10%', in:ai, out:Math.round(ao*0.9), color:'rgba(77,163,255,0.45)', dim:'rgba(77,163,255,0.03)',  dash:[4,3]},
-    {label:'현재 추세',  in:ai, out:ao,                 color:'rgba(255,255,255,0.55)',dim:'rgba(255,255,255,0.02)',dash:[5,4]},
-    {label:'지출 +10%', in:ai, out:Math.round(ao*1.1), color:'rgba(255,176,32,0.45)', dim:'rgba(255,176,32,0.03)',  dash:[4,3]},
-    {label:'지출 +20%', in:ai, out:Math.round(ao*1.2), color:'rgba(255,176,32,1.0)',  dim:'rgba(255,176,32,0.07)',  dash:[]},
-  ];
-
-  // 각 시나리오별 12개월 포인트 계산
+  // 단일 트렌드 라인 + 낙관(지출-20%)~비관(지출+20%) 범위를 음영 밴드로 표현.
+  // 실제 입금/출금(초록·빨강)과 구분되는 블루 색조 유지.
   const hist=real.slice(-5);
   const lastM=hist[hist.length-1]?.month||'';
   const lm=lastM.match(/(\d+)년 (\d+)월/);
@@ -572,76 +607,63 @@ function buildFc(){
   const allL=[...hist.map(m=>m.month),...fcLabels];
   const histConnect=hist[hist.length-1].cumulative;
 
+  function project(outAdj){
+    const pts=[]; let bal=cb;
+    for(let i=0;i<12;i++){ bal += ai-Math.round(ao*outAdj); pts.push(Math.round(bal)); }
+    return pts;
+  }
+  const trendPts=project(1.0);
+  const optPts=project(0.8);   // 지출 20% 적게 → 낙관(잔액 상단)
+  const pessPts=project(1.2);  // 지출 20% 많이 → 비관(잔액 하단)
+  const nullsHist=new Array(4).fill(null);
+
   const datasets=[
-    // 실제 이력
-    {label:'실제',data:[...hist.map(m=>m.cumulative),...new Array(12).fill(null)],
-     borderColor:'rgba(255,255,255,0.4)',backgroundColor:'rgba(255,255,255,0.02)',
-     fill:true,tension:0.4,pointRadius:0,borderWidth:2}
+    {label:'실제', data:[...hist.map(m=>m.cumulative), ...new Array(12).fill(null)],
+     borderColor:'rgba(232,232,234,0.45)', backgroundColor:'transparent',
+     fill:false, tension:0.35, pointRadius:0, borderWidth:2, order:1},
+    {label:'낙관', data:[...nullsHist, histConnect, ...optPts],
+     borderColor:'transparent', backgroundColor:'transparent',
+     fill:false, tension:0.35, pointRadius:0, borderWidth:0, order:4},
+    {label:'비관', data:[...nullsHist, histConnect, ...pessPts],
+     borderColor:'transparent', backgroundColor:'rgba(77,163,255,0.09)',
+     fill:'-1', tension:0.35, pointRadius:0, borderWidth:0, order:3},
+    {label:'현재 추세', data:[...nullsHist, histConnect, ...trendPts],
+     borderColor:'#4da3ff', backgroundColor:'transparent',
+     fill:false, tension:0.35, pointRadius:0, borderWidth:2, borderDash:[5,4], order:2},
   ];
 
-  scenarios.forEach(sc=>{
-    const pts=[]; let bal=cb;
-    for(let i=0;i<12;i++){ bal+=sc.in-sc.out; pts.push(Math.round(bal)); }
-    datasets.push({
-      label:sc.label,
-      data:[...new Array(4).fill(null), histConnect, ...pts],
-      borderColor:sc.color, backgroundColor:sc.dim,
-      fill:false, tension:0.4, pointRadius:0, borderWidth:1.5,
-      borderDash:sc.dash
-    });
-  });
-
-  if(FC)FC.destroy();
-  FC=new Chart(document.getElementById('fcC'),{
-    type:'line',
-    data:{labels:allL,datasets},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          mode:'index',intersect:false,
-          callbacks:{
-            label:c=>c.raw!=null?` ${c.dataset.label}: ${fmtK(c.raw)}원`:null,
-            filter:c=>c.raw!=null
+  if(FC){
+    FC.data.labels=allL;
+    FC.data.datasets=datasets;
+    FC.update();
+  } else {
+    FC=new Chart(document.getElementById('fcC'),{
+      type:'line',
+      data:{labels:allL,datasets},
+      options:{responsive:true,maintainAspectRatio:false,
+        animation:{duration:500,easing:'easeOutQuart'},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            mode:'index',intersect:false,
+            filter:c=>c.dataset.label==='실제'||c.dataset.label==='현재 추세',
+            callbacks:{ label:c=>c.raw!=null?` ${c.dataset.label}: ${fmtK(c.raw)}원`:null }
           }
-        }
-      },
-      scales:{
-        x:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},maxRotation:45},grid:{display:false},border:{display:false}},
-        y:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}
-      }}
-  });
+        },
+        scales:{
+          x:{ticks:{color:'rgba(232,232,234,0.28)',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:6},grid:{display:false},border:{display:false}},
+          y:{ticks:{color:'rgba(232,232,234,0.28)',font:{size:10},callback:v=>fmtK(v)},grid:{color:'rgba(232,232,234,0.05)'},border:{display:false}}
+        }}
+    });
+  }
 
-  // 설명 텍스트
+  const bal12Trend=trendPts[11], bal12Opt=optPts[11], bal12Pess=pessPts[11];
   const desc=document.getElementById('fc-desc');
   if(desc) desc.innerHTML=
-    `입금 기준: 최근 6개월 평균 <b style="color:rgba(255,255,255,0.7)">${fmtK(ai)}원</b> &nbsp;·&nbsp; `+
-    `지출 기준: 최근 12개월 IQR 평균 <b style="color:rgba(255,255,255,0.7)">${fmtK(ao)}원</b> (비경상 ${excluded}개월 제외)`;
-
-  // 카드: 5개 시나리오 × 12개월 후 잔액
-  const fcc=document.getElementById('fc-cards');
-  fcc.innerHTML='';
-  // 카드: 블루↔앰버 그라데이션 배경 (입금/출금 초록·빨강과 구분)
-  const cardStyles=[
-    {bg:'rgba(77,163,255,0.18)', border:'rgba(77,163,255,0.35)', mo:'rgba(77,163,255,0.55)', val:'#4da3ff', chg:'rgba(77,163,255,0.7)'},
-    {bg:'rgba(77,163,255,0.07)', border:'rgba(77,163,255,0.18)', mo:'rgba(77,163,255,0.4)',  val:'rgba(77,163,255,0.8)', chg:'rgba(77,163,255,0.5)'},
-    {bg:'rgba(255,255,255,0.04)',border:'rgba(255,255,255,0.12)',mo:'rgba(255,255,255,0.3)',val:'rgba(255,255,255,0.75)',chg:'rgba(255,255,255,0.4)'},
-    {bg:'rgba(255,176,32,0.07)',  border:'rgba(255,176,32,0.18)', mo:'rgba(255,176,32,0.4)',  val:'rgba(255,176,32,0.8)', chg:'rgba(255,176,32,0.5)'},
-    {bg:'rgba(255,176,32,0.18)',  border:'rgba(255,176,32,0.35)', mo:'rgba(255,176,32,0.55)', val:'#ffb020', chg:'rgba(255,176,32,0.7)'},
-  ];
-  scenarios.forEach((sc,i)=>{
-    const bal12=Math.round(cb+(sc.in-sc.out)*12);
-    const chg=bal12-cb;
-    const isP=chg>=0;
-    const netMo=sc.in-sc.out;
-    const cs=cardStyles[i];
-    fcc.innerHTML+=`<div class="fcc" style="background:${cs.bg};border:1px solid ${cs.border};">
-      <div class="fcc-mo" style="color:${cs.mo}">${sc.label}</div>
-      <div class="fcc-val" style="color:${cs.val}">${fmtK(bal12)}원</div>
-      <div class="fcc-chg" style="color:${cs.chg}">${isP?'▲':'▼'} ${fmtK(Math.abs(chg))}</div>
-      <div style="font-size:10px;margin-top:4px;color:${cs.chg};opacity:0.8;">월 ${isP?'+':''}${fmtK(netMo)}</div>
-    </div>`;
-  });
+    `입금 기준 최근 6개월 평균 <b style="color:var(--w2)">${fmtK(ai)}원</b> · `+
+    `지출 기준 최근 12개월 평균 <b style="color:var(--w2)">${fmtK(ao)}원</b>(비경상 ${excluded}개월 제외)<br>`+
+    `12개월 후 예상 잔액 <b style="color:#4da3ff">${fmtK(bal12Trend)}원</b> `+
+    `<span style="color:var(--w4)">(범위 ${fmtK(bal12Pess)}~${fmtK(bal12Opt)}원)</span>`;
 }
 
 function buildPaySelect(){
