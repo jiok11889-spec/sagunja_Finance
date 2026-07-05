@@ -1,6 +1,6 @@
 """사군자 회비 대시보드  |  python dashboard.py  →  http://localhost:8888"""
 import json, os
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 import pandas as pd
 from openpyxl import load_workbook
@@ -90,12 +90,14 @@ def build_data():
     for r in rows:
         if r['분류1']=='입금' and r['분류2'] in ('지각비','이자'):
             extra_income[r['연월']]=extra_income.get(r['연월'],0)+r['대변']
-    expense_by_cat={}; expense_by_month={}
+    expense_by_cat={}; expense_by_month={}; expense_by_month_meeting={}
     for r in rows:
         if r['분류1']=='출금' and r['차변']>0:
             net = r['차변'] - (r['대변'] if r['대변'] else 0)  # 대변(환불/환급)이 있으면 차감, 음수도 반영
             expense_by_cat[r['분류2']]=expense_by_cat.get(r['분류2'],0)+net
             expense_by_month[r['연월']]=expense_by_month.get(r['연월'],0)+net
+            if r['분류2']!='경조사비':  # 월평균 카드용: 경조사비(비경상) 제외한 모임비 기준
+                expense_by_month_meeting[r['연월']]=expense_by_month_meeting.get(r['연월'],0)+net
     total_in=sum(income_by_month.values())+sum(extra_income.values())
     total_out=sum(expense_by_cat.values())
     balance=total_in-total_out
@@ -107,9 +109,20 @@ def build_data():
         cumulative+=inc-exp
         monthly.append({'month':ym,'income':int(inc),'expense':int(exp),'cumulative':int(cumulative)})
     mwi=[m for m in monthly if m['income']>0]
-    def avg_n(n):
-        sub=mwi[-n:] if len(mwi)>=n else mwi
-        return int(sum(m['income'] for m in sub)/len(sub)) if sub else 0
+    mwo=[m for m in monthly if m['expense']>0]
+    meeting_monthly=[{'month':ym,'expense':int(expense_by_month_meeting.get(ym,0))} for ym in all_months]
+    mwo_meeting=[m for m in meeting_monthly if m['expense']>0]
+    def stats_n(vals_list, n, key):
+        sub=vals_list[-n:] if len(vals_list)>=n else vals_list
+        if not sub: return {'mean':0,'median':0}
+        vals=sorted(m[key] for m in sub)
+        mean=int(sum(vals)/len(vals))
+        ln=len(vals)
+        median=vals[ln//2] if ln%2==1 else (vals[ln//2-1]+vals[ln//2])/2
+        return {'mean':mean,'median':int(round(median))}
+    income_stats={str(n):stats_n(mwi,n,'income') for n in (3,6,12)}
+    expense_stats={str(n):stats_n(mwo,n,'expense') for n in (3,6,12)}
+    meeting_expense_stats={str(n):stats_n(mwo_meeting,n,'expense') for n in (3,6,12)}
     cat_data=[{'name':k,'value':int(v)} for k,v in sorted(expense_by_cat.items(),key=lambda x:-x[1]) if v>0]
     member_totals=load_member_totals()
     valid=[r for r in rows if r['차변']>0 or r['대변']>0]
@@ -125,7 +138,7 @@ def build_data():
     }
     pay_months=list(payment_by_month.keys())
     return {
-        'summary':{'total_in':total_in,'total_out':total_out,'balance':balance,'avg3':avg_n(3),'avg6':avg_n(6),'avg12':avg_n(12),'updated':datetime.now().strftime('%Y-%m-%d %H:%M'),'latest_ym':latest_ym},
+        'summary':{'total_in':total_in,'total_out':total_out,'balance':balance,'income_stats':income_stats,'expense_stats':expense_stats,'meeting_expense_stats':meeting_expense_stats,'updated':datetime.now().strftime('%Y-%m-%d %H:%M'),'latest_ym':latest_ym},
         'monthly':monthly,'categories':cat_data,'members':member_totals,
         'payment_by_month':payment_by_month,'pay_months':pay_months,'recent':recent_list,
     }
@@ -155,6 +168,12 @@ HTML = '''<!DOCTYPE html>
   --w4:rgba(255,255,255,0.15);
   --neg:#ff5e5e;
   --neg-dim:rgba(255,94,94,0.10);
+  --fc-pos:#4da3ff;
+  --fc-pos-dim:rgba(77,163,255,0.10);
+  --fc-pos-dim2:rgba(77,163,255,0.18);
+  --fc-neg:#ffb020;
+  --fc-neg-dim:rgba(255,176,32,0.10);
+  --fc-neg-dim2:rgba(255,176,32,0.18);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{background:var(--bg);}
@@ -189,14 +208,22 @@ nav{
 .hero-meta-period{font-size:11px;color:var(--w3);margin-bottom:6px;}
 .hero-meta-net{font-size:13px;color:var(--p);font-weight:500;}
 .hero-divider{height:1px;background:var(--line);margin-bottom:20px;}
-.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
+.hero-groups{display:flex;flex-direction:column;gap:12px;}
+.hgroup{border-radius:12px;padding:14px 18px;}
+.hgroup-cum{padding:0 0 2px;}
+.hgroup-trend{background:var(--s2);border:1px solid var(--line);}
+.hgroup-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.hgroup-lbl{font-size:10px;letter-spacing:1.5px;color:var(--w3);text-transform:uppercase;}
+.hero-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0;}
 .hstat{padding:0 20px;}
-.hstat:first-child{padding-left:0;}
-.hstat:last-child{padding-right:0;}
+.hstat.first{padding-left:0;}
+.hstat.last{padding-right:0;}
 .hstat+.hstat{border-left:1px solid var(--line);}
 .hstat-lbl{font-size:10px;letter-spacing:1.5px;color:var(--w3);text-transform:uppercase;margin-bottom:6px;}
+.hstat-note{font-size:8px;letter-spacing:0.2px;color:var(--w4);text-transform:none;margin-left:5px;}
 .hstat-val{font-size:22px;font-weight:300;color:var(--w);}
 .hstat-sub{font-size:10px;color:var(--w3);margin-top:3px;}
+.hgroup-trend .hstat-val{font-size:19px;color:var(--w2);}
 
 /* SECTION */
 .sec{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:14px;}
@@ -226,14 +253,14 @@ nav{
 .fcc-mo{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
 .fcc-val{font-size:18px;font-weight:300;margin-bottom:4px;}
 .fcc-chg{font-size:11px;}
-.fcc.pos{background:var(--p-dim);border:1px solid rgba(0,212,160,0.15);}
-.fcc.pos .fcc-mo{color:rgba(0,212,160,0.5);}
-.fcc.pos .fcc-val{color:var(--p);}
-.fcc.pos .fcc-chg{color:rgba(0,212,160,0.6);}
-.fcc.neg{background:var(--neg-dim);border:1px solid rgba(255,94,94,0.15);}
-.fcc.neg .fcc-mo{color:rgba(255,94,94,0.5);}
-.fcc.neg .fcc-val{color:var(--neg);}
-.fcc.neg .fcc-chg{color:rgba(255,94,94,0.6);}
+.fcc.pos{background:var(--fc-pos-dim);border:1px solid rgba(77,163,255,0.15);}
+.fcc.pos .fcc-mo{color:rgba(77,163,255,0.5);}
+.fcc.pos .fcc-val{color:var(--fc-pos);}
+.fcc.pos .fcc-chg{color:rgba(77,163,255,0.6);}
+.fcc.neg{background:var(--fc-neg-dim);border:1px solid rgba(255,176,32,0.15);}
+.fcc.neg .fcc-mo{color:rgba(255,176,32,0.5);}
+.fcc.neg .fcc-val{color:var(--fc-neg);}
+.fcc.neg .fcc-chg{color:rgba(255,176,32,0.6);}
 
 /* 2COL */
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -244,13 +271,13 @@ nav{
 .pay-count{font-size:11px;color:var(--w3);}
 .pay-count span{color:var(--w2);}
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.mc{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px;border-radius:10px;border:1px solid var(--line);}
+.mc{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px;border-radius:10px;border:1px solid var(--line);min-width:0;}
 .mc.paid{background:var(--p-dim);border-color:rgba(0,212,160,0.2);}
 .mc.unpaid{background:var(--s3);}
-.mc-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;}
+.mc-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;}
 .mc.paid .mc-av{background:rgba(0,212,160,0.2);color:var(--p);}
 .mc.unpaid .mc-av{background:rgba(255,255,255,0.06);color:var(--w3);}
-.mc-name{font-size:10px;letter-spacing:-0.2px;}
+.mc-name{font-size:10px;letter-spacing:-0.2px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mc.paid .mc-name{color:var(--w);}
 .mc.unpaid .mc-name{color:var(--w3);}
 .mc-tag{font-size:9px;padding:2px 7px;border-radius:4px;font-weight:500;letter-spacing:0.3px;}
@@ -277,7 +304,7 @@ nav{
 .tag-회비{background:var(--p-dim);color:var(--p);}
 .tag-경조사비{background:rgba(248,190,100,0.1);color:#f8be64;}
 .tag-강연비{background:rgba(168,139,250,0.1);color:#a88bfa;}
-.tag-경품비{background:var(--neg-dim);color:var(--neg);}
+.tag-경품비{background:rgba(255,111,168,0.10);color:#ff6fa8;}
 .tag-지각비{background:rgba(0,212,160,0.07);color:rgba(0,212,160,0.6);}
 .tag-이자{background:rgba(255,255,255,0.05);color:var(--w3);}
 .tag-기타{background:rgba(255,255,255,0.05);color:var(--w3);}
@@ -286,8 +313,13 @@ nav{
   .two{grid-template-columns:1fr;}
   .hero-num{font-size:44px;}
   .hstat-val{font-size:18px;}
+  .hgroup-trend .hstat-val{font-size:16px;}
   .mgrid{grid-template-columns:repeat(3,1fr);}
-  .fc-row{grid-template-columns:repeat(3,1fr);}
+  .fc-row{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:128px;overflow-x:auto;gap:8px;padding-bottom:6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .fc-row::-webkit-scrollbar{display:none;}
+  .fcc{scroll-snap-align:start;}
+  .hstat{padding:0 10px;}
+  .hgroup-head{flex-wrap:wrap;gap:8px;}
 }
 </style>
 </head>
@@ -297,7 +329,7 @@ nav{
   <span class="nav-logo">사<em>군</em>자</span>
   <div class="nav-right">
     <span class="nav-time" id="nav-time">—</span>
-    <button class="nav-btn" onclick="init()">REFRESH</button>
+    <button class="nav-btn" id="refresh-btn" onclick="init()">REFRESH</button>
   </div>
 </nav>
 
@@ -314,21 +346,43 @@ nav{
       </div>
     </div>
     <div class="hero-divider"></div>
-    <div class="hero-stats">
-      <div class="hstat">
-        <div class="hstat-lbl">Total In</div>
-        <div class="hstat-val" id="h-in">—</div>
-        <div class="hstat-sub">회비 + 지각비 + 이자</div>
+    <div class="hero-groups">
+      <div class="hgroup hgroup-cum">
+        <div class="hgroup-lbl">누적 총계</div>
+        <div class="hero-stats">
+          <div class="hstat first">
+            <div class="hstat-lbl">Total In</div>
+            <div class="hstat-val" id="h-in">—</div>
+            <div class="hstat-sub">회비 + 지각비 + 이자</div>
+          </div>
+          <div class="hstat last">
+            <div class="hstat-lbl">Total Out</div>
+            <div class="hstat-val" id="h-out">—</div>
+            <div class="hstat-sub">모임비 + 경조사비 외</div>
+          </div>
+        </div>
       </div>
-      <div class="hstat">
-        <div class="hstat-lbl">Total Out</div>
-        <div class="hstat-val" id="h-out">—</div>
-        <div class="hstat-sub">모임비 + 경조사비 외</div>
-      </div>
-      <div class="hstat">
-        <div class="hstat-lbl">월 평균 입금</div>
-        <div class="hstat-val" id="h-avg">—</div>
-        <div class="hstat-sub">최근 6개월 기준</div>
+      <div class="hgroup hgroup-trend">
+        <div class="hgroup-head">
+          <span class="hgroup-lbl">최근 추세 · 평균 기준</span>
+          <div class="tabs" id="avg-toggle">
+            <button class="tab" data-n="3" onclick="setAvgPeriod(3,this)">3개월</button>
+            <button class="tab on" data-n="6" onclick="setAvgPeriod(6,this)">6개월</button>
+            <button class="tab" data-n="12" onclick="setAvgPeriod(12,this)">12개월</button>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="hstat first">
+            <div class="hstat-lbl">월 평균 입금</div>
+            <div class="hstat-val" id="h-avg-in">—</div>
+            <div class="hstat-sub" id="h-avg-in-sub">—</div>
+          </div>
+          <div class="hstat last">
+            <div class="hstat-lbl">월 평균 모임비<span class="hstat-note">경조사비 제외</span></div>
+            <div class="hstat-val" id="h-avg-out">—</div>
+            <div class="hstat-sub" id="h-avg-out-sub">—</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -368,9 +422,9 @@ nav{
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <span class="pay-count" id="pay-count">—</span>
-        <div onclick="navigator.clipboard.writeText('79790864002')" title="클릭하면 계좌번호 복사" style="cursor:pointer;background:rgba(0,212,160,0.08);border:1px solid rgba(0,212,160,0.2);border-radius:8px;padding:5px 11px;text-align:right;">
+        <div id="copy-acc" onclick="copyAccount()" title="클릭하면 계좌번호 복사" style="cursor:pointer;background:rgba(0,212,160,0.08);border:1px solid rgba(0,212,160,0.2);border-radius:8px;padding:5px 11px;text-align:right;transition:border-color .2s,background .2s;">
           <div style="font-size:9px;color:rgba(0,212,160,0.6);letter-spacing:0.8px;margin-bottom:2px;">카카오뱅크 · 조현민</div>
-          <div style="font-size:12px;font-weight:500;color:#00D4A0;letter-spacing:1px;">7979-0864-002</div>
+          <div id="acc-num" style="font-size:12px;font-weight:500;color:#00D4A0;letter-spacing:1px;">7979-0864-002</div>
         </div>
       </div>
       <div class="mgrid" id="mgrid"></div>
@@ -387,11 +441,32 @@ nav{
 const fmtFull = n => Math.round(Math.abs(n)).toLocaleString('ko-KR');
 const fmtK    = n => { const a=Math.abs(Math.round(n)); return a>=1000000?(a/1000000).toFixed(1)+'M':a>=10000?(a/10000).toFixed(0)+'만':a.toLocaleString(); };
 
-let D=null, MC=null, FC=null, mode='bar';
+let D=null, MC=null, FC=null, mode='bar', avgPeriod=6;
 
 async function init(){
+  const btn=document.getElementById('refresh-btn');
+  btn.disabled=true; btn.textContent='LOADING…'; btn.style.opacity=0.5;
   document.getElementById('nav-time').textContent='…';
-  const r=await fetch('/api/data'); D=await r.json(); render();
+  try{
+    const r=await fetch('/api/data'); D=await r.json(); render();
+  } finally {
+    btn.disabled=false; btn.textContent='REFRESH'; btn.style.opacity=1;
+  }
+}
+
+function copyAccount(){
+  try{ navigator.clipboard.writeText('79790864002'); }catch(e){}
+  const box=document.getElementById('copy-acc'), num=document.getElementById('acc-num');
+  const orig=num.textContent;
+  num.textContent='✓ 복사완료';
+  box.style.background='rgba(0,212,160,0.18)';
+  box.style.borderColor='rgba(0,212,160,0.5)';
+  clearTimeout(window.__copyTimer);
+  window.__copyTimer=setTimeout(()=>{
+    num.textContent=orig;
+    box.style.background='rgba(0,212,160,0.08)';
+    box.style.borderColor='rgba(0,212,160,0.2)';
+  },1500);
 }
 
 function render(){
@@ -404,12 +479,27 @@ function render(){
   document.getElementById('h-net').textContent=(net>=0?'▲ +':'▼ ')+fmtK(net)+'원 순증';
   document.getElementById('h-in').textContent=fmtK(s.total_in)+'원';
   document.getElementById('h-out').textContent=fmtK(s.total_out)+'원';
-  document.getElementById('h-avg').textContent=fmtK(s.avg6)+'원';
+  updateAvgCards();
   buildMain(); buildFc(); buildPaySelect(); buildMembers(); buildTL();
 }
 
+function setAvgPeriod(n,btn){
+  avgPeriod=n;
+  document.querySelectorAll('#avg-toggle .tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  updateAvgCards();
+}
+
+function updateAvgCards(){
+  const inc=D.summary.income_stats[avgPeriod]||{mean:0,median:0};
+  const exp=D.summary.meeting_expense_stats[avgPeriod]||{mean:0,median:0};
+  document.getElementById('h-avg-in').textContent=fmtK(inc.mean)+'원';
+  document.getElementById('h-avg-in-sub').textContent=`최근 ${avgPeriod}개월 평균 · 보통 ${fmtK(inc.median)}원`;
+  document.getElementById('h-avg-out').textContent=fmtK(exp.mean)+'원';
+  document.getElementById('h-avg-out-sub').textContent=`최근 ${avgPeriod}개월 평균 · 보통 ${fmtK(exp.median)}원`;
+}
+
 function buildMain(){
-  if(MC) MC.destroy();
   const real=D.monthly.filter(m=>m.income>0||m.expense>0);
   const labels=real.map(m=>m.month);
   let ds;
@@ -421,15 +511,22 @@ function buildMain(){
       {type:mode,label:'출금',data:real.map(m=>m.expense),backgroundColor:mode==='bar'?'rgba(255,94,94,0.55)':'transparent',borderColor:'#ff5e5e',borderRadius:mode==='bar'?3:0,borderWidth:1.5,tension:0.4,pointRadius:0,fill:false},
     ];
   }
-  MC=new Chart(document.getElementById('mainC'),{
-    data:{labels,datasets:ds},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtK(c.raw)+'원'}}},
-      scales:{
-        x:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},
-        y:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}
-      }}
-  });
+  if(MC){
+    MC.data.labels=labels;
+    MC.data.datasets=ds;
+    MC.update();
+  } else {
+    MC=new Chart(document.getElementById('mainC'),{
+      data:{labels,datasets:ds},
+      options:{responsive:true,maintainAspectRatio:false,
+        animation:{duration:500,easing:'easeOutQuart'},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtK(c.raw)+'원'}}},
+        scales:{
+          x:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},
+          y:{ticks:{color:'rgba(255,255,255,0.25)',font:{size:10},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}
+        }}
+    });
+  }
 }
 
 function iqrFilter(arr){
@@ -452,13 +549,13 @@ function buildFc(){
   const excluded=loVals.length-loFiltered.length;
   const cb=D.summary.balance;
 
-  // 5개 시나리오 — 에메랄드(절약) ↔ 레드(지출과다) 그라데이션
+  // 5개 시나리오 — 블루(절약) ↔ 앰버(지출과다) 그라데이션. 실제 입금/출금(초록·빨강)과 구분되는 별도 색조.
   const scenarios=[
-    {label:'지출 -20%', in:ai, out:Math.round(ao*0.8), color:'rgba(0,212,160,1.0)',  dim:'rgba(0,212,160,0.07)',  dash:[]},
-    {label:'지출 -10%', in:ai, out:Math.round(ao*0.9), color:'rgba(0,212,160,0.45)', dim:'rgba(0,212,160,0.03)',  dash:[4,3]},
+    {label:'지출 -20%', in:ai, out:Math.round(ao*0.8), color:'rgba(77,163,255,1.0)',  dim:'rgba(77,163,255,0.07)',  dash:[]},
+    {label:'지출 -10%', in:ai, out:Math.round(ao*0.9), color:'rgba(77,163,255,0.45)', dim:'rgba(77,163,255,0.03)',  dash:[4,3]},
     {label:'현재 추세',  in:ai, out:ao,                 color:'rgba(255,255,255,0.55)',dim:'rgba(255,255,255,0.02)',dash:[5,4]},
-    {label:'지출 +10%', in:ai, out:Math.round(ao*1.1), color:'rgba(255,94,94,0.45)', dim:'rgba(255,94,94,0.03)',  dash:[4,3]},
-    {label:'지출 +20%', in:ai, out:Math.round(ao*1.2), color:'rgba(255,94,94,1.0)',  dim:'rgba(255,94,94,0.07)',  dash:[]},
+    {label:'지출 +10%', in:ai, out:Math.round(ao*1.1), color:'rgba(255,176,32,0.45)', dim:'rgba(255,176,32,0.03)',  dash:[4,3]},
+    {label:'지출 +20%', in:ai, out:Math.round(ao*1.2), color:'rgba(255,176,32,1.0)',  dim:'rgba(255,176,32,0.07)',  dash:[]},
   ];
 
   // 각 시나리오별 12개월 포인트 계산
@@ -524,13 +621,13 @@ function buildFc(){
   // 카드: 5개 시나리오 × 12개월 후 잔액
   const fcc=document.getElementById('fc-cards');
   fcc.innerHTML='';
-  // 카드: 에메랄드↔레드 그라데이션 배경
+  // 카드: 블루↔앰버 그라데이션 배경 (입금/출금 초록·빨강과 구분)
   const cardStyles=[
-    {bg:'rgba(0,212,160,0.18)', border:'rgba(0,212,160,0.35)', mo:'rgba(0,212,160,0.55)', val:'#00D4A0', chg:'rgba(0,212,160,0.7)'},
-    {bg:'rgba(0,212,160,0.07)', border:'rgba(0,212,160,0.18)', mo:'rgba(0,212,160,0.4)',  val:'rgba(0,212,160,0.8)', chg:'rgba(0,212,160,0.5)'},
+    {bg:'rgba(77,163,255,0.18)', border:'rgba(77,163,255,0.35)', mo:'rgba(77,163,255,0.55)', val:'#4da3ff', chg:'rgba(77,163,255,0.7)'},
+    {bg:'rgba(77,163,255,0.07)', border:'rgba(77,163,255,0.18)', mo:'rgba(77,163,255,0.4)',  val:'rgba(77,163,255,0.8)', chg:'rgba(77,163,255,0.5)'},
     {bg:'rgba(255,255,255,0.04)',border:'rgba(255,255,255,0.12)',mo:'rgba(255,255,255,0.3)',val:'rgba(255,255,255,0.75)',chg:'rgba(255,255,255,0.4)'},
-    {bg:'rgba(255,94,94,0.07)',  border:'rgba(255,94,94,0.18)', mo:'rgba(255,94,94,0.4)',  val:'rgba(255,94,94,0.8)', chg:'rgba(255,94,94,0.5)'},
-    {bg:'rgba(255,94,94,0.18)',  border:'rgba(255,94,94,0.35)', mo:'rgba(255,94,94,0.55)', val:'#ff5e5e', chg:'rgba(255,94,94,0.7)'},
+    {bg:'rgba(255,176,32,0.07)',  border:'rgba(255,176,32,0.18)', mo:'rgba(255,176,32,0.4)',  val:'rgba(255,176,32,0.8)', chg:'rgba(255,176,32,0.5)'},
+    {bg:'rgba(255,176,32,0.18)',  border:'rgba(255,176,32,0.35)', mo:'rgba(255,176,32,0.55)', val:'#ffb020', chg:'rgba(255,176,32,0.7)'},
   ];
   scenarios.forEach((sc,i)=>{
     const bal12=Math.round(cb+(sc.in-sc.out)*12);
@@ -637,7 +734,7 @@ if __name__=='__main__':
     env_port = os.environ.get('PORT')
     if env_port:
         port = int(env_port)
-        server = HTTPServer(('0.0.0.0', port), Handler)
+        server = ThreadingHTTPServer(('0.0.0.0', port), Handler)
         print(f'사군자 대시보드 실행 중: http://0.0.0.0:{port}')
         try: server.serve_forever()
         except KeyboardInterrupt: print('\n서버 종료.')
@@ -659,7 +756,7 @@ if __name__=='__main__':
         url  = f'http://localhost:{port}'
 
         try:
-            server = HTTPServer(('0.0.0.0', port), Handler)
+            server = ThreadingHTTPServer(('0.0.0.0', port), Handler)
         except OSError:
             print(f'포트 {port} 사용 중. 브라우저에서 {url} 을 열어보세요.')
             webbrowser.open(url); exit()
