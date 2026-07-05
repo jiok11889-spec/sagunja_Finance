@@ -220,6 +220,26 @@ nav{
 .t-month-val.pos{color:var(--p);}
 .t-month-val.neg{color:var(--neg);}
 
+/* 핵심 운영 지표 — 월평균 모임비 (두 번째 강조점, 유일한 강조 서페이스) [확정: B안 뉴트럴/화이트] */
+.t-focus{
+  margin-top:22px;
+  padding:24px 26px;
+  border-radius:16px;
+  background:linear-gradient(180deg, rgba(232,232,234,0.06), rgba(232,232,234,0.015));
+  border:1px solid rgba(232,232,234,0.14);
+  border-top:2px solid rgba(232,232,234,0.55);
+}
+.t-focus-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap;}
+.t-focus-titlewrap{display:flex;align-items:baseline;gap:8px;}
+.t-focus-title{font-size:12px;letter-spacing:1.3px;color:var(--w);text-transform:uppercase;font-weight:500;}
+.t-focus-note{font-size:9px;color:var(--w4);letter-spacing:0.2px;}
+.t-focus-val{font-size:42px;font-weight:500;color:var(--w);letter-spacing:-1.3px;font-variant-numeric:tabular-nums;line-height:1;}
+.t-focus-sub{font-size:11px;color:var(--w3);margin-top:8px;}
+.t-focus-secondary{display:flex;align-items:baseline;gap:9px;padding-top:16px;margin-top:16px;border-top:1px solid rgba(232,232,234,0.08);font-size:11px;color:var(--w4);flex-wrap:wrap;}
+.t-focus-sec-lbl{letter-spacing:0.3px;}
+.t-focus-sec-val{color:var(--w3);font-weight:500;font-variant-numeric:tabular-nums;}
+.t-focus-sec-sub{color:var(--w4);}
+
 /* TIER 3 — 상세 (작게 · 옅게, 박스 대신 헤어라인+여백) */
 .t-detail{padding-top:4px;}
 .d-block{padding:26px 0;border-top:1px solid var(--line);}
@@ -228,7 +248,6 @@ nav{
 .d-row{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
 .d-stat{display:flex;flex-direction:column;gap:4px;}
 .d-stat-lbl{font-size:10px;letter-spacing:1px;color:var(--w4);text-transform:uppercase;}
-.d-stat-note{font-size:8px;color:var(--w4);text-transform:none;margin-left:5px;letter-spacing:0.2px;opacity:0.7;}
 .d-stat-val{font-size:19px;font-weight:300;color:var(--w2);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;}
 .d-stat-sub{font-size:10px;color:var(--w4);}
 
@@ -301,6 +320,8 @@ nav{
   .t-hero-num{font-size:50px;letter-spacing:-1.5px;}
   .t-month-val{font-size:19px;}
   .t-month-row{gap:10px;}
+  .t-focus{padding:20px 20px;}
+  .t-focus-val{font-size:34px;}
   .d-two{grid-template-columns:1fr;}
   .d-two-col+.d-two-col{padding-left:0;border-left:none;border-top:1px solid var(--line);padding-top:24px;margin-top:24px;}
   .mgrid{grid-template-columns:repeat(3,1fr);}
@@ -353,6 +374,28 @@ nav{
     </div>
   </section>
 
+  <!-- 핵심 운영 지표: 월평균 모임비 (두 번째 강조점) -->
+  <section class="t-focus">
+    <div class="t-focus-head">
+      <div class="t-focus-titlewrap">
+        <span class="t-focus-title">월 평균 모임비</span>
+        <span class="t-focus-note">경조사비 제외</span>
+      </div>
+      <div class="tabs" id="avg-toggle">
+        <button class="tab" data-n="3" onclick="setAvgPeriod(3,this)">3개월</button>
+        <button class="tab on" data-n="6" onclick="setAvgPeriod(6,this)">6개월</button>
+        <button class="tab" data-n="12" onclick="setAvgPeriod(12,this)">12개월</button>
+      </div>
+    </div>
+    <div class="t-focus-val" id="h-avg-out">—</div>
+    <div class="t-focus-sub" id="h-avg-out-sub">—</div>
+    <div class="t-focus-secondary">
+      <span class="t-focus-sec-lbl">월 평균 입금</span>
+      <span class="t-focus-sec-val" id="h-avg-in">—</span>
+      <span class="t-focus-sec-sub" id="h-avg-in-sub">—</span>
+    </div>
+  </section>
+
   <!-- TIER 3: 상세 -->
   <section class="t-detail">
 
@@ -368,29 +411,6 @@ nav{
           <span class="d-stat-lbl">Total Out</span>
           <span class="d-stat-val" id="h-out">—</span>
           <span class="d-stat-sub">모임비 + 경조사비 외</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="d-block">
-      <div class="d-head">
-        <span class="d-title">최근 추세 평균</span>
-        <div class="tabs" id="avg-toggle">
-          <button class="tab" data-n="3" onclick="setAvgPeriod(3,this)">3개월</button>
-          <button class="tab on" data-n="6" onclick="setAvgPeriod(6,this)">6개월</button>
-          <button class="tab" data-n="12" onclick="setAvgPeriod(12,this)">12개월</button>
-        </div>
-      </div>
-      <div class="d-row">
-        <div class="d-stat">
-          <span class="d-stat-lbl">월 평균 입금</span>
-          <span class="d-stat-val" id="h-avg-in">—</span>
-          <span class="d-stat-sub" id="h-avg-in-sub">—</span>
-        </div>
-        <div class="d-stat">
-          <span class="d-stat-lbl">월 평균 모임비<span class="d-stat-note">경조사비 제외</span></span>
-          <span class="d-stat-val" id="h-avg-out">—</span>
-          <span class="d-stat-sub" id="h-avg-out-sub">—</span>
         </div>
       </div>
     </div>
