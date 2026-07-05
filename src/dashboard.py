@@ -159,21 +159,17 @@ HTML = '''<!DOCTYPE html>
   --s3:#20232A;
   --line:rgba(232,232,234,0.07);
   --line2:rgba(232,232,234,0.13);
-  --p:#00D4A0;
-  --p-dim:rgba(0,212,160,0.10);
-  --p-dim2:rgba(0,212,160,0.18);
+  --p:#2BAE86;
+  --p-dim:rgba(43,174,134,0.10);
+  --p-dim2:rgba(43,174,134,0.18);
   --w:#E8E8EA;
   --w2:rgba(232,232,234,0.68);
   --w3:rgba(232,232,234,0.38);
   --w4:rgba(232,232,234,0.16);
-  --neg:#ff5e5e;
-  --neg-dim:rgba(255,94,94,0.10);
-  --fc-pos:#4da3ff;
-  --fc-pos-dim:rgba(77,163,255,0.10);
-  --fc-pos-dim2:rgba(77,163,255,0.18);
-  --fc-neg:#ffb020;
-  --fc-neg-dim:rgba(255,176,32,0.10);
-  --fc-neg-dim2:rgba(255,176,32,0.18);
+  --neg:#E0645F;
+  --neg-dim:rgba(224,100,95,0.10);
+  --fc:#7C93B0;
+  --fc-dim:rgba(124,147,176,0.09);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{background:var(--bg);}
@@ -273,22 +269,22 @@ nav{
 .pay-toprow{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
 .pay-count{font-size:11px;color:var(--w4);}
 .pay-count span{color:var(--w2);}
-.copy-box{cursor:pointer;background:var(--p-dim);border:1px solid rgba(0,212,160,0.2);border-radius:8px;padding:6px 12px;text-align:right;transition:border-color .2s,background .2s;flex-shrink:0;}
-.copy-box.copied{background:rgba(0,212,160,0.2);border-color:rgba(0,212,160,0.5);}
-.copy-lbl{font-size:9px;color:rgba(0,212,160,0.6);letter-spacing:0.6px;margin-bottom:2px;}
+.copy-box{cursor:pointer;background:var(--p-dim);border:1px solid rgba(43,174,134,0.2);border-radius:8px;padding:6px 12px;text-align:right;transition:border-color .2s,background .2s;flex-shrink:0;}
+.copy-box.copied{background:rgba(43,174,134,0.2);border-color:rgba(43,174,134,0.5);}
+.copy-lbl{font-size:9px;color:rgba(43,174,134,0.7);letter-spacing:0.6px;margin-bottom:2px;}
 .copy-num{font-size:12px;font-weight:500;color:var(--p);letter-spacing:0.8px;font-variant-numeric:tabular-nums;}
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .mc{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px;border-radius:10px;border:1px solid var(--line);min-width:0;}
-.mc.paid{background:var(--p-dim);border-color:rgba(0,212,160,0.18);}
+.mc.paid{background:var(--p-dim);border-color:rgba(43,174,134,0.18);}
 .mc.unpaid{background:transparent;}
 .mc-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;}
-.mc.paid .mc-av{background:rgba(0,212,160,0.18);color:var(--p);}
+.mc.paid .mc-av{background:rgba(43,174,134,0.18);color:var(--p);}
 .mc.unpaid .mc-av{background:rgba(232,232,234,0.05);color:var(--w4);}
 .mc-name{font-size:10px;letter-spacing:-0.2px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mc.paid .mc-name{color:var(--w2);}
 .mc.unpaid .mc-name{color:var(--w4);}
 .mc-tag{font-size:9px;padding:2px 7px;border-radius:4px;font-weight:500;letter-spacing:0.3px;}
-.mc.paid .mc-tag{background:rgba(0,212,160,0.15);color:var(--p);}
+.mc.paid .mc-tag{background:rgba(43,174,134,0.15);color:var(--p);}
 .mc.unpaid .mc-tag{background:rgba(232,232,234,0.04);color:var(--w4);}
 
 /* TIMELINE */
@@ -312,7 +308,7 @@ nav{
 .tag-경조사비{background:rgba(232,232,234,0.07);color:var(--w3);}
 .tag-강연비{background:rgba(232,232,234,0.07);color:var(--w3);}
 .tag-경품비{background:rgba(232,232,234,0.07);color:var(--w3);}
-.tag-지각비{background:var(--p-dim);color:rgba(0,212,160,0.6);}
+.tag-지각비{background:var(--p-dim);color:rgba(43,174,134,0.7);}
 .tag-이자{background:rgba(232,232,234,0.04);color:var(--w4);}
 .tag-기타{background:rgba(232,232,234,0.04);color:var(--w4);}
 
@@ -425,8 +421,8 @@ nav{
         </div>
       </div>
       <div class="leg-row">
-        <span class="leg"><span class="leg-dot" style="background:#00D4A0"></span>입금</span>
-        <span class="leg"><span class="leg-dot" style="background:#ff5e5e"></span>출금</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--p)"></span>입금</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--neg)"></span>출금</span>
       </div>
       <div class="chart-box"><canvas id="mainC"></canvas></div>
     </div>
@@ -570,8 +566,8 @@ function buildMain(){
     ds=[{type:'line',data:real.map(m=>m.cumulative),borderColor:'rgba(255,255,255,0.5)',backgroundColor:'rgba(255,255,255,0.03)',fill:true,tension:0.4,pointRadius:0,borderWidth:1.5,borderDash:[4,3]}];
   } else {
     ds=[
-      {type:mode,label:'입금',data:real.map(m=>m.income),backgroundColor:mode==='bar'?'rgba(0,212,160,0.65)':'transparent',borderColor:'#00D4A0',borderRadius:mode==='bar'?3:0,borderWidth:1.5,tension:0.4,pointRadius:0,fill:false},
-      {type:mode,label:'출금',data:real.map(m=>m.expense),backgroundColor:mode==='bar'?'rgba(255,94,94,0.55)':'transparent',borderColor:'#ff5e5e',borderRadius:mode==='bar'?3:0,borderWidth:1.5,tension:0.4,pointRadius:0,fill:false},
+      {type:mode,label:'입금',data:real.map(m=>m.income),backgroundColor:mode==='bar'?'rgba(43,174,134,0.55)':'transparent',borderColor:'#2BAE86',borderRadius:mode==='bar'?3:0,borderWidth:1.5,tension:0.4,pointRadius:0,fill:false},
+      {type:mode,label:'출금',data:real.map(m=>m.expense),backgroundColor:mode==='bar'?'rgba(224,100,95,0.48)':'transparent',borderColor:'#E0645F',borderRadius:mode==='bar'?3:0,borderWidth:1.5,tension:0.4,pointRadius:0,fill:false},
     ];
   }
   if(MC){
@@ -645,10 +641,10 @@ function buildFc(){
      borderColor:'transparent', backgroundColor:'transparent',
      fill:false, tension:0.35, pointRadius:0, borderWidth:0, order:4},
     {label:'비관', data:[...nullsHist, histConnect, ...pessPts],
-     borderColor:'transparent', backgroundColor:'rgba(77,163,255,0.09)',
+     borderColor:'transparent', backgroundColor:'rgba(124,147,176,0.09)',
      fill:'-1', tension:0.35, pointRadius:0, borderWidth:0, order:3},
     {label:'현재 추세', data:[...nullsHist, histConnect, ...trendPts],
-     borderColor:'#4da3ff', backgroundColor:'transparent',
+     borderColor:'#7C93B0', backgroundColor:'transparent',
      fill:false, tension:0.35, pointRadius:0, borderWidth:2, borderDash:[5,4], order:2},
   ];
 
@@ -682,7 +678,7 @@ function buildFc(){
   if(desc) desc.innerHTML=
     `입금 기준 최근 6개월 평균 <b style="color:var(--w2)">${fmtK(ai)}원</b> · `+
     `지출 기준 최근 12개월 평균 <b style="color:var(--w2)">${fmtK(ao)}원</b>(비경상 ${excluded}개월 제외)<br>`+
-    `12개월 후 예상 잔액 <b style="color:#4da3ff">${fmtK(bal12Trend)}원</b> `+
+    `12개월 후 예상 잔액 <b style="color:#7C93B0">${fmtK(bal12Trend)}원</b> `+
     `<span style="color:var(--w4)">(범위 ${fmtK(bal12Pess)}~${fmtK(bal12Opt)}원)</span>`;
 }
 
@@ -702,7 +698,7 @@ function buildMembers(ym){
   ym=ym||D.summary.latest_ym;
   const ms=D.payment_by_month[ym]||[];
   const pc=ms.filter(m=>m.paid).length;
-  document.getElementById('pay-count').innerHTML=`<span style="color:#00D4A0;font-weight:500">${pc}명</span> / ${ms.length}명 납부완료`;
+  document.getElementById('pay-count').innerHTML=`<span style="color:var(--p);font-weight:500">${pc}명</span> / ${ms.length}명 납부완료`;
   const g=document.getElementById('mgrid'); g.innerHTML='';
   // 납부자 먼저, 미납자 뒤에
   const sorted=[...ms].sort((a,b)=>b.paid-a.paid);
